@@ -106,7 +106,14 @@
                 max-height: 600px;
             }
         }
-
+        /* 移除日历日期下划线 */
+        .fc-daygrid-day-number {
+            text-decoration: none !important;
+        }
+        /* 可选：同时移除其他可能的下划线 */
+        .fc-col-header-cell-cushion {
+            text-decoration: none !important;
+        }
         .fc-toolbar {
             padding: 1rem 1.5rem;
             margin-bottom: 0;
@@ -487,6 +494,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-pdf">
+                            <i class="bi bi-file-pdf me-1"></i>导出PDF
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" id="export-data">
                             <i class="bi bi-download me-1"></i>导出数据
                         </a>
@@ -606,7 +618,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">多类型事件</h6>
-                                <small class="text-muted">支持point、schedule和deadline事件</small>
+                                <small class="text-muted">支持三种事件</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -615,7 +627,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">事件分组</h6>
-                                <small class="text-muted">支持事件分组和重复事件</small>
+                                <small class="text-muted">支持分组和重复</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -624,7 +636,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">数据导出</h6>
-                                <small class="text-muted">可将数据导出为JSON文件</small>
+                                <small class="text-muted">可将数据导出</small>
                             </div>
                         </div>
                     </div>
@@ -989,7 +1001,24 @@
             
             showToast('数据导出成功！', 'success');
         }
-
+        // 导出PDF功能
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            // 保存当前任务数据到localStorage
+            localStorage.setItem('pdfExportData', JSON.stringify(tasks));
+            
+            // 获取当前日历状态
+            const currentDate = calendar.getDate();
+            const currentView = calendar.view.type;
+            
+            // 构建导出URL
+            const params = new URLSearchParams({
+                view: currentView,
+                date: currentDate.toISOString().split('T')[0]
+            });
+            
+            // 打开导出页面
+            window.open(`pdf-export.html?${params.toString()}`, '_blank');
+        });
         // 更新界面
         function updateUI() {
             renderTodayTasks();

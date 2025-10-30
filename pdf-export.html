@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日历导出 - ChronoWeave</title>
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4361ee;
+        }
+        
+        .header h1 {
+            color: #4361ee;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .calendar-container {
+            flex: 1;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 100vh;
+            min-height: 800px;
+        }
+        
+        .fc {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100% !important;
+        }
+        
+        .fc-toolbar {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .fc-toolbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #4361ee;
+        }
+        
+        .fc-button {
+            background-color: #4361ee !important;
+            border: none !important;
+            border-radius: 4px !important;
+            padding: 6px 12px !important;
+            font-size: 14px !important;
+        }
+        
+        .fc-button:hover {
+            background-color: #3a56d4 !important;
+        }
+        
+        .fc-daygrid-event {
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        
+        .fc-event-title {
+            font-weight: 500;
+        }
+        
+        /* 增加时间槽高度 */
+        .fc-timegrid-slots td {
+            height: 40px !important;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .print-controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .print-btn {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .print-btn:hover {
+            background-color: #3a56d4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 打印样式优化 */
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .print-controls {
+                display: none;
+            }
+            
+            .fc {
+                border: none;
+                border-radius: 0;
+                height: auto !important;
+            }
+            
+            .fc-toolbar {
+                background-color: transparent;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .fc-button {
+                display: none !important;
+            }
+            
+            .header {
+                margin-bottom: 10px;
+                padding-bottom: 10px;
+            }
+            
+            .footer {
+                margin-top: 20px;
+                padding-top: 10px;
+            }
+            
+            /* 周视图和日视图打印优化 */
+            .fc-timeGridWeek-view .fc-scrollgrid,
+            .fc-timeGridDay-view .fc-scrollgrid {
+                height: auto !important;
+                min-height: 0;
+            }
+            
+            .fc-timegrid-slots td {
+                height: 30px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ChronoWeave 日历导出</h1>
+        <p>日期范围: <span id="date-range"></span></p>
+    </div>
+    
+    <div class="print-controls">
+        <button class="print-btn" onclick="window.print()">
+            <i class="bi bi-printer"></i> 打印日历
+        </button>
+    </div>
+    
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 ChronoWeave | 智能日程规划器 | 导出时间: <span id="export-time"></span></p>
+    </div>
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/zh-cn.js"></script>
+    
+    <script>
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const viewType = urlParams.get('view') || 'timeGridWeek'; // 默认周视图
+        const dateParam = urlParams.get('date') || new Date().toISOString().split('T')[0];
+        
+        // 从localStorage获取任务数据
+        let tasks = [];
+        try {
+            const storedData = localStorage.getItem('pdfExportData');
+            if (storedData) {
+                tasks = JSON.parse(storedData);
+            }
+        } catch (e) {
+            console.error('解析任务数据失败:', e);
+        }
+        
+        // 设置导出时间
+        document.getElementById('export-time').textContent = new Date().toLocaleString('zh-CN');
+        
+        // 初始化日历
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: viewType,
+                initialDate: dateParam,
+                locale: 'zh-cn',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: '今天',
+                    month: '月',
+                    week: '周',
+                    day: '日'
+                },
+                height: '100%', // 使用100%高度
+                contentHeight: 'auto', // 内容高度自适应
+                expandRows: true, // 扩展行以填充高度
+                slotMinTime: '00:00', // 从午夜开始
+                slotMaxTime: '24:00', // 到午夜结束
+                slotLabelInterval: '01:00', // 每小时显示一次标签
+                slotDuration: '00:30', // 每30分钟一个槽
+                slotLabelFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    omitZeroMinute: false,
+                    meridiem: 'short'
+                },
+                allDaySlot: true, // 显示全天事件槽
+                events: tasks.map(task => {
+                    let start, end;
+                    
+                    if (task.type === 'schedule') {
+                        start = `${task.date}T${task.startTime}`;
+                        
+                        // 处理跨天事件
+                        if (task.endTime < task.startTime) {
+                            const nextDay = new Date(task.date);
+                            nextDay.setDate(nextDay.getDate() + 1);
+                            const nextDayStr = nextDay.toISOString().split('T')[0];
+                            end = `${nextDayStr}T${task.endTime}`;
+                        } else {
+                            end = `${task.date}T${task.endTime}`;
+                        }
+                    } else {
+                        start = `${task.date}T${task.time}`;
+                        end = start;
+                    }
+                    
+                    return {
+                        id: task.id,
+                        title: task.title,
+                        start: start,
+                        end: end,
+                        backgroundColor: getEventColor(task.priority),
+                        borderColor: getEventColor(task.priority),
+                        extendedProps: {
+                            priority: task.priority,
+                            description: task.description
+                        }
+                    };
+                }),
+                eventContent: function(arg) {
+                    // 简化事件显示内容
+                    return {
+                        html: `<div class="fc-event-title">${arg.event.title}</div>`
+                    };
+                }
+            });
+            
+            calendar.render();
+            
+            // 更新日期范围显示
+            updateDateRange(calendar);
+            
+            // 监听视图变化
+            calendar.on('datesSet', function() {
+                updateDateRange(calendar);
+            });
+        });
+        
+        // 根据优先级获取事件颜色
+        function getEventColor(priority) {
+            const colors = {
+                high: '#f72585',    // 高优先级 - 红色
+                medium: '#f8961e', // 中优先级 - 橙色
+                low: '#4cc9f0'     // 低优先级 - 蓝色
+            };
+            return colors[priority] || '#4361ee'; // 默认颜色
+        }
+        
+        // 更新日期范围显示
+        function updateDateRange(calendar) {
+            const view = calendar.view;
+            const start = view.activeStart;
+            const end = view.activeEnd;
+            
+            let rangeText = '';
+            
+            if (view.type === 'dayGridMonth') {
+                rangeText = start.toLocaleDateString('zh-CN', {year: 'numeric', month: 'long'});
+            } else if (view.type === 'timeGridWeek') {
+                rangeText = `${start.toLocaleDateString('zh-CN')} - ${new Date(end.getTime() - 86400000).toLocaleDateString('zh-CN')}`;
+            } else {
+                rangeText = start.toLocaleDateString('zh-CN');
+            }
+            
+            document.getElementById('date-range').textContent = rangeText;
+        }
+    </script>
+</body>
+</html>
