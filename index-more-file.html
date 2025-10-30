@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能日程规划器 - ChronoWeave</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    
+    <style>
+        /* 所有之前的CSS样式保持不变 */
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        /* ... 其余CSS样式保持不变 ... */
+    </style>
+</head>
+<body>
+    <!-- 导航栏和HTML结构保持不变 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+        <!-- ... 导航栏内容保持不变 ... -->
+    </nav>
+
+    <!-- 主内容区保持不变 -->
+    <div class="container my-4">
+        <!-- ... 所有HTML内容保持不变 ... -->
+    </div>
+
+    <!-- 任务详情模态框保持不变 -->
+    <div class="modal fade task-detail-modal" id="taskDetailModal" tabindex="-1" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
+        <!-- ... 模态框内容保持不变 ... -->
+    </div>
+
+    <!-- 通知Toast保持不变 -->
+    <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+        <!-- ... Toast内容保持不变 ... -->
+    </div>
+
+    <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+        <!-- ... Toast内容保持不变 ... -->
+    </div>
+
+    <!-- 页脚保持不变 -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <!-- ... 页脚内容保持不变 ... -->
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/zh-cn.js"></script>
+    
+    <script>
+        // 全局变量
+        let tasks = [];
+        let calendar;
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 初始化日历
+            initializeCalendar();
+            
+            // 加载任务数据
+            await loadTaskData();
+            
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 初始化FullCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'zh-cn',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: '今天',
+                    month: '月',
+                    week: '周',
+                    day: '日'
+                },
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    // 将任务转换为FullCalendar事件格式
+                    const events = tasks.map(task => {
+                        let start, end;
+                        
+                        // 根据事件类型设置开始和结束时间
+                        if (task.type === 'schedule') {
+                            start = `${task.date}T${task.startTime}`;
+                            
+                            // 处理跨天事件
+                            if (task.endTime < task.startTime) {
+                                // 结束时间比开始时间早，表示跨天事件
+                                const nextDay = new Date(task.date);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                const nextDayStr = nextDay.toISOString().split('T')[0];
+                                end = `${nextDayStr}T${task.endTime}`;
+                            } else {
+                                end = `${task.date}T${task.endTime}`;
+                            }
+                        } else {
+                            // point和deadline类型使用time字段
+                            start = `${task.date}T${task.time}`;
+                            end = start; // 单点事件，结束时间与开始时间相同
+                        }
+                        
+                        // 为Deadline事件添加特殊样式类
+                        let className = '';
+                        if (task.type === 'deadline') {
+                            className = 'deadline-event';
+                        } else if (task.type === 'schedule' && task.endTime < task.startTime) {
+                            className = 'multi-day-event';
+                        }
+                        
+                        return {
+                            id: task.id,
+                            title: task.title,
+                            start: start,
+                            end: end,
+                            extendedProps: {
+                                type: task.type,
+                                gid: task.gid,
+                                rid: task.rid,
+                                priority: task.priority,
+                                category: task.category,
+                                description: task.description,
+                                completed: task.completed,
+                                time: task.time,
+                                startTime: task.startTime,
+                                endTime: task.endTime
+                            },
+                            backgroundColor: getEventColor(task.priority),
+                            borderColor: getEventColor(task.priority),
+                            className: className
+                        };
+                    });
+                    successCallback(events);
+                },
+                eventClick: function(info) {
+                    showTaskDetails(info.event);
+                }
+            });
+            
+            calendar.render();
+        }
+
+        // 从多个外部JSON文件加载任务数据
+        async function loadTaskData() {
+            try {
+                showLoadingState();
+                
+                // 定义要加载的JSON文件列表
+                const dataFiles = [
+                    'data/schedule1.json',
+                    'data/schedule2.json',
+                    'data/schedule3.json'
+                ];
+                
+                // 使用Promise.all并行加载所有文件
+                const responses = await Promise.all(
+                    dataFiles.map(file => fetch(file))
+                );
+                
+                // 检查所有响应是否成功
+                for (const response of responses) {
+                    if (!response.ok) {
+                        throw new Error(`无法加载数据文件: ${response.url}`);
+                    }
+                }
+                
+                // 解析所有JSON数据
+                const dataSets = await Promise.all(
+                    responses.map(response => response.json())
+                );
+                
+                // 合并所有任务数据
+                tasks = [];
+                dataSets.forEach(data => {
+                    if (data.schedule && Array.isArray(data.schedule)) {
+                        tasks = tasks.concat(data.schedule);
+                    }
+                });
+                
+                // 更新界面
+                updateUI();
+                showToast(`数据加载成功！从${dataFiles.length}个文件加载了${tasks.length}个任务。`, 'success');
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showToast('无法加载任务数据: ' + error.message, 'error');
+            }
+        }
+
+        // 导出数据为JSON文件
+        function exportData() {
+            const dataStr = JSON.stringify({ schedule: tasks }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'schedule-data.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('数据导出成功！', 'success');
+        }
+
+        // 更新界面
+        function updateUI() {
+            renderTodayTasks();
+            updateStatistics();
+            calendar.refetchEvents();
+        }
+
+        // 根据优先级获取事件颜色
+        function getEventColor(priority) {
+            const colors = {
+                high: '#f72585',    // 高优先级 - 红色
+                medium: '#f8961e', // 中优先级 - 橙色
+                low: '#4cc9f0'     // 低优先级 - 蓝色
+            };
+            return colors[priority] || '#4361ee'; // 默认颜色
+        }
+
+        // 根据优先级获取徽章颜色类
+        function getPriorityBadgeClass(priority) {
+            const classes = {
+                high: 'bg-danger',
+                medium: 'bg-warning',
+                low: 'bg-success'
+            };
+            return classes[priority] || 'bg-secondary';
+        }
+
+        // 获取优先级文本
+        function getPriorityText(priority) {
+            const texts = {
+                high: '高',
+                medium: '中',
+                low: '低'
+            };
+            return texts[priority] || '普通';
+        }
+
+        // 获取事件类型文本
+        function getEventTypeText(type) {
+            const texts = {
+                point: '时间点',
+                schedule: '时间段',
+                deadline: '截止时间'
+            };
+            return texts[type] || type;
+        }
+
+        // 获取事件类型样式类
+        function getEventTypeClass(type) {
+            const classes = {
+                point: 'type-point',
+                schedule: 'type-schedule',
+                deadline: 'type-deadline'
+            };
+            return classes[type] || '';
+        }
+
+        // 渲染今日任务
+        function renderTodayTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayTasks = tasks.filter(task => task.date === today);
+            const container = document.getElementById('today-tasks');
+            const countElement = document.getElementById('today-task-count');
+            
+            countElement.textContent = `${todayTasks.length}个任务`;
+            
+            if (todayTasks.length === 0) {
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>今日无安排，享受轻松的一天！</div>';
+                return;
+            }
+            
+            container.innerHTML = todayTasks.map(task => {
+                // 根据事件类型显示不同的时间信息
+                let timeInfo = '';
+                if (task.type === 'schedule') {
+                    timeInfo = `${task.startTime} - ${task.endTime}`;
+                    if (task.endTime < task.startTime) {
+                        timeInfo += ' (跨天)';
+                    }
+                } else {
+                    timeInfo = task.time;
+                }
+                
+                return `
+                <div class="list-group-item task-item priority-${task.priority} ${task.completed ? 'opacity-50' : ''}">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 ${task.completed ? 'text-decoration-line-through' : ''}">${task.title}</h6>
+                                <span class="badge ${getPriorityBadgeClass(task.priority)}">${getPriorityText(task.priority)}优先级</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="event-type-indicator ${getEventTypeClass(task.type)}">
+                                    <i class="bi ${task.type === 'point' ? 'bi-dot' : task.type === 'schedule' ? 'bi-clock' : 'bi-alarm'} me-1"></i>
+                                    ${getEventTypeText(task.type)}
+                                </span>
+                                ${task.gid ? `<small class="text-muted">组: ${task.gid}.${task.rid}</small>` : ''}
+                            </div>
+                            ${task.description ? `<p class="mb-1 small text-muted">${task.description}</p>` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>${timeInfo}</small>
+                                <div>
+                                    ${task.completed ? 
+                                        '<span class="badge bg-success me-1"><i class="bi bi-check-circle me-1"></i>已完成</span>' : 
+                                        '<span class="badge bg-secondary me-1"><i class="bi bi-clock me-1"></i>待完成</span>'
+                                    }
+                                    <span class="badge bg-light text-dark">${task.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const highPriorityTasks = tasks.filter(task => task.priority === 'high').length;
+            const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+            document.getElementById('high-priority-tasks').textContent = highPriorityTasks;
+            document.getElementById('completion-rate').textContent = `${completionRate}%`;
+        }
+
+        // 显示任务详情
+        function showTaskDetails(event) {
+            const task = event.extendedProps;
+            
+            // 根据事件类型设置时间信息
+            let timeInfo = '';
+            if (task.type === 'schedule') {
+                const startTime = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const endTime = event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                timeInfo = `${startTime} - ${endTime}`;
+                
+                // 如果是跨天事件，添加提示
+                if (task.endTime < task.startTime) {
+                    timeInfo += ' (跨天事件)';
+                }
+            } else {
+                timeInfo = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            // 计算持续时间（仅对schedule类型有效）
+            let durationText = '';
+            if (task.type === 'schedule') {
+                const durationMs = event.end - event.start;
+                const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+                const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+                durationText = durationHours > 0 ? 
+                    `${durationHours}小时${durationMinutes > 0 ? `${durationMinutes}分钟` : ''}` : 
+                    `${durationMinutes}分钟`;
+            }
+            
+            // 设置类别图标
+            const categoryIcons = {
+                '学习': 'bi-journal-text',
+                '工作': 'bi-briefcase',
+                '个人': 'bi-person',
+                '健康': 'bi-heart',
+                '社交': 'bi-people'
+            };
+            
+            // 填充模态框内容
+            document.getElementById('taskDetailTitle').textContent = event.title;
+            document.getElementById('taskDetailDescription').textContent = task.description || '暂无描述';
+            document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + '优先级';
+            document.getElementById('taskDetailPriority').className = 'badge ' + getPriorityBadgeClass(task.priority);
+            document.getElementById('taskDetailCategory').textContent = task.category;
+            document.getElementById('taskDetailStatus').textContent = task.completed ? '已完成' : '待完成';
+            document.getElementById('taskDetailStatus').className = task.completed ? 'task-status status-completed' : 'task-status status-pending';
+            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('zh-CN');
+            document.getElementById('taskDetailTime').textContent = timeInfo;
+            document.getElementById('taskDetailType').textContent = getEventTypeText(task.type);
+            document.getElementById('taskDetailGroup').textContent = `${task.gid}.${task.rid}`;
+            document.getElementById('taskCategoryIcon').className = categoryIcons[task.category] || 'bi-tag';
+            document.getElementById('taskDetailCategoryFull').textContent = task.category;
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            modal.show();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('refresh-data').addEventListener('click', async function() {
+                await loadTaskData();
+            });
+            
+            document.getElementById('toggle-view').addEventListener('click', function() {
+                const currentView = calendar.view.type;
+                if (currentView === 'dayGridMonth') {
+                    calendar.changeView('timeGridWeek');
+                } else if (currentView === 'timeGridWeek') {
+                    calendar.changeView('timeGridDay');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            });
+            
+            document.getElementById('export-data').addEventListener('click', function() {
+                exportData();
+            });
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            document.getElementById('today-tasks').innerHTML = `
+                <div class="text-center p-4 text-muted">
+                    <div class="loading-spinner mb-2"></div>
+                    <div>加载任务中...</div>
+                </div>
+            `;
+            
+            document.getElementById('today-task-count').textContent = '加载中...';
+            document.getElementById('total-tasks').textContent = '-';
+            document.getElementById('completed-tasks').textContent = '-';
+            document.getElementById('high-priority-tasks').textContent = '-';
+            document.getElementById('completion-rate').textContent = '-';
+        }
+
+        // 显示Toast通知
+        function showToast(message, type) {
+            const toastElement = type === 'success' ? 
+                document.getElementById('successToast') : 
+                document.getElementById('errorToast');
+                
+            const messageElement = type === 'success' ?
+                document.getElementById('toastMessage') :
+                document.getElementById('errorToastMessage');
+                
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+    </script>
+</body>
+</html>
