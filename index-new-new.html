@@ -1076,7 +1076,8 @@
                 showLoadingState();
                 
                 // 使用新的JSON格式
-                const response = await fetch('data/schedule_new.json');
+                //const response = await fetch('data/schedule_new.json');
+                const response = await fetch('data.json');
                 if (!response.ok) throw new Error('无法加载数据文件');
                 const data = await response.json();
                 
