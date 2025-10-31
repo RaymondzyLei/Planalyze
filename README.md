@@ -1,147 +1,161 @@
-# Planalyze - 日程管理与任务规划系统
-## 项目简介
+# Planalyze - Lightweight Scheduling & Task Management Project
 
-Planalyze 是一个功能强大的日程管理与任务规划系统，作为程序设计课程的大作业项目开发。系统结合了C++后端的高效数据处理能力和现代Web前端的友好交互体验，为用户提供直观的日程安排和任务管理功能。
+[中文版本](README-zh.md)
 
-## ✨ 功能特点
+## Project Introduction
 
-### 核心功能
-- 📅 **智能日历视图** - 基于FullCalendar的现代化日历界面
-- 📝 **任务管理** - 支持任务的增删改查操作
-- ⚡ **快速命令行处理** - C++后端提供高效的数据处理能力
-- 🎨 **响应式设计** - 适配各种设备尺寸的Bootstrap界面
-- 🔔 **提醒功能** - 重要日程和任务的及时提醒(todo)
+Planalyze is a powerful schedule management and task planning system developed as a major programming course project. The system combines the efficient data processing capabilities of the C++ backend with the user-friendly interactive experience of modern web frontend, providing intuitive schedule arrangement and task management functions.
 
-### 技术特色
-- 前后端分离架构
-- 实时数据同步
-- 模块化组件设计
-- 跨平台兼容性
+## ✨✨ Key Features
 
-## 🛠 技术栈
+### Core Features
+- 📅📅 **Smart Calendar View** - Modern calendar interface based on FullCalendar
+- 📝📝 **Task Management** - Support for task CRUD operations
+- ⚡⚡⚡ **Fast Command Line Processing** - Efficient data processing powered by C++ backend
+- 🎨🎨🎨 **Responsive Design** - Bootstrap interface adaptable to various device sizes
+- 🔔🔔 **Reminder Functionality** - Timely notifications for important schedules and tasks (todo)
 
-### 后端技术
-- **C++17** - 核心业务逻辑处理
-- 命令行接口快速响应
-- 高效内存管理
-- 文件系统操作
+### Technical Highlights
+- Frontend-backend separation architecture
+- Real-time data synchronization
+- Modular component design
+- Cross-platform compatibility
 
-### 前端技术
-- **HTML5** - 页面结构
-- **CSS3** - 样式设计
-- **JavaScript ES6+** - 交互逻辑
-- **Bootstrap** - UI框架
-- **FullCalendar** - 日历组件
+## 🛠🛠🛠 Tech Stack
 
-## 🚀 快速开始
+### Backend Technologies
+- **C++17** - Core business logic processing
+- Fast command-line interface response
+- Efficient memory management
+- File system operations
 
-### 环境要求
-- C++编译器 (GCC 9.0+ 或 Clang 10.0+)
-- 现代Web浏览器 (Edge 90+, Chrome 90+, Firefox 88+, Safari 14+)
-- python 3或vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer),用于构建服务端环境
-- 没有其他要求了，很方便不是吗
+### Frontend Technologies
+- **HTML5** - Page structure
+- **CSS3** - Styling design
+- **JavaScript ES6+** - Interactive logic
+- **Bootstrap** - UI framework
+- **FullCalendar** - Calendar component
 
-### 安装步骤
+## 🚀🚀🚀 Quick Start
 
-1. **克隆项目**
+### Environment Requirements
+- C++ compiler (GCC 9.0+ or Clang 10.0+)
+- Modern web browser (Edge 90+, Chrome 90+, Firefox 88+, Safari 14+)
+- Python 3 or VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) for building server environment
+- No other requirements needed - pretty convenient, right?
+
+### Installation Steps
+
+1. **Clone the Project**
 ```bash
 git clone https://github.com/your-username/planalyze.git
 cd planalyze
 ```
-或者下载源代码
+Or download the source code directly
 
-2. **编译后端程序**
+2. **Compile Backend Program**
 
-编译planalyze.cpp得到planalyze.exe
+Compile planalyze.cpp to get planalyze.exe
 
-1. **启动前端服务**
+3. **Start Frontend Server**
 ```bash
 python -m http.server 8000
 ```
-或者使用vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+Or use VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
-1. **访问应用**
-打开浏览器访问 `http://localhost:8000`
+4. **Access Application**
+Open browser and visit `http://localhost:8000/index-en.html`
 
-## 📁 项目结构
+## 📁📁 Project Structure
 
 ```
 planalyze/
-├── docs/                  # 文档
-└── README.md             # 项目说明
+├── planalyze.cpp            # Main program source code
+├── json.hpp                 # JSON library header file
+├── data/                    # Data storage directory
+│   ├── bg.jpg               # Background image
+├── data.json                # Task data storage file
+├── docs/ (todo)             # Documentation directory
+├── index.html               # Chinese interface
+├── index-en.html            # English interface
+├── .gitignore               # Git ignore file configuration
+├── LICENSE                  # Open source license
+└── README.md                # Project documentation
 ```
 
-## 💡 使用说明
+## 💡💡 Usage Guide
 
-### 基本操作
+### Basic Operations
 
-1. **增删任务**
-   - 通过命令行快速添加
-   - 通过命令行查看任务ID并进行修改、删除
+1. **Add/Delete Tasks**
+   - Quick addition via command line
+   - View task IDs via command line for modification and deletion
 
-2. **查看日程**
-   - 日历视图显示所有安排
-   - 列表视图按时间排序显示任务
+2. **View Schedules**
+   - Display all arrangements in calendar view
+   - Show tasks sorted by time in list view
 
-3. **管理任务**
-   - 标记任务完成状态
-   - 设置任务优先级
+3. **Manage Tasks**
+   - Mark task completion status
+   - Set task priorities
 
-### 命令行接口示例
+### Command Line Interface Examples
 
 ```bash
-# 查看帮助
+# View help
 ./planalyze.exe
 
-# 添加任务
+# Add task
 ./planalyze.exe -a
 
-# 查看任务
+# List tasks
 ./planalyze.exe -l
 
-# 删除任务
+# Remove task
 ./planalyze.exe -r
 ```
 
-## 🔧 开发指南
+## 🔧🔧 Development Guide
 
-### 前端开发
-前端基于Bootstrap和FullCalendar构建，支持自定义主题。
+### Frontend Development
+Frontend is built on Bootstrap and FullCalendar, supporting custom themes.
 
-### 后端开发
-使用[JSON for Modern C++](https://github.com/nlohmann/json)将用户通过命令行输入的日程数据存放在data.json中
+### Backend Development
+Using [JSON for Modern C++](https://github.com/nlohmann/json) to store schedule data entered by users via command line in data.json
 
-## 🤝 贡献指南
+## 🤝🤝 Contribution Guide
 
-我们欢迎社区贡献！请遵循以下步骤：
+We welcome community contributions! Please follow these steps:
 
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 开源协议
+## 📄📄 License
 
-本项目以及使用的开源项目均采用 MIT 协议 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project and the open source projects used are all under MIT License - see the LICENSE file for details.
 
-## 🙏 致谢
+## 🙏🙏 Acknowledgments
 
-感谢以下开源项目的支持：
+Thanks to the following open source projects for support:
 
-- https://getbootstrap.com/ - 现代化的响应式前端框架
-- https://fullcalendar.io/ - 功能丰富的JavaScript日历库
+- https://getbootstrap.com/ - Modern responsive frontend framework
+- https://fullcalendar.io/ - Feature-rich JavaScript calendar library
 - https://github.com/nlohmann/json - JSON for Modern C++
-- 程序设计课程提供的学习机会和指导
+- Programming course for providing learning opportunities and guidance
 
-## 📞 联系方式
+## 📞📞 Contact
 
-如有问题或建议，请通过以下方式联系：
+For questions or suggestions, please contact us through:
 
-- 项目主页：https://github.com/RaymondzyLei/Planalyze
-- 邮箱：raymond.zy.lei@outlook.com
-- Issues：https://github.com/RaymondzyLei/Planalyze/issues
+- Project homepage: https://github.com/RaymondzyLei/Planalyze
+- Email: raymond.zy.lei@outlook.com
+- Issues: https://github.com/RaymondzyLei/Planalyze/issues
 
 ---
 
-**Planalyze** - 让日程管理变得更简单高效！ 📅✨
+This is my first project. If you notice any errors or shortcomings, please let me know. If you like this project, feel free to give it a Star!
+
+**Planalyze** - Making schedule management simpler and more efficient! 📅📅✨

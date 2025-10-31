@@ -675,7 +675,7 @@
         
         <div class="row">
             <!-- Left Side: Calendar and Task List -->
-            <div class="col-lg-10">
+            <div class="col-lg-9">
                 <!-- Calendar Area -->
                 <div class="card">
                     <div class="card-header">
@@ -708,7 +708,7 @@
             </div>
             
             <!-- Right Side: Statistics and Quick Actions -->
-            <div class="col-lg-2">
+            <div class="col-lg-3">
                 <!-- Statistics -->
                 <div class="card sidebar-card">
                     <div class="card-header">
@@ -773,8 +773,8 @@
                                 <i class="bi bi-calendar-check"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">Complex Recurring Events</h6>
-                                <small class="text-muted">Supports daily/weekly/monthly/yearly repetition</small>
+                                <h6 class="mb-0">Recurring Events</h6>
+                                <small class="text-muted">Supports repetition</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -783,7 +783,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">Excluded Dates</h6>
-                                <small class="text-muted">Supports excluding specific date ranges</small>
+                                <small class="text-muted">Supports excluding date ranges</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -1032,8 +1032,7 @@
                         if (task.repetition && task.repetition !== 'Once') {
                             className += ' recurring-event';
                         }
-                        
-                        return {
+                                                return {
                             id: task.id,
                             title: task.title,
                             start: start,
@@ -1053,7 +1052,7 @@
                                 end_date: task.end_date,
                                 banned: task.banned,
                                 enabled_days: task.enabled_days,
-                                originalEvent: task.originalEvent // 保存原始事件数据
+                                originalEvent: task.originalEvent // Save original event data
                             },
                             backgroundColor: getEventColor(task.priority),
                             borderColor: getEventColor(task.priority),
@@ -1070,127 +1069,127 @@
             calendar.render();
         }
 
-        // 从外部JSON文件加载任务数据
+        // Load task data from external JSON file
         async function loadTaskData() {
             try {
                 showLoadingState();
                 
-                // 使用新的JSON格式
+                // Using new JSON format
                 //const response = await fetch('data/schedule_new.json');
                 const response = await fetch('data.json');
-                if (!response.ok) throw new Error('无法加载数据文件');
+                if (!response.ok) throw new Error('Failed to load data file');
                 const data = await response.json();
                 
-                // 处理新格式的数据
+                // Process data in new format
                 tasks = generateEventInstances(data.events || []);
                 
-                // 更新界面
+                // Update interface
                 updateUI();
-                showToast('数据加载成功！', 'success');
+                showToast('Data loaded successfully!', 'success');
             } catch (error) {
-                console.error('加载数据失败:', error);
-                showToast('无法加载任务数据: ' + error.message, 'error');
+                console.error('Failed to load data:', error);
+                showToast('Unable to load task data: ' + error.message, 'error');
                 
-                // 使用示例数据作为后备
+                // Use sample data as fallback
                 tasks = generateEventInstances([
                     {
                         "category": "once",
                         "date": new Date().toISOString().split('T')[0],
-                        "description": "一次性事件示例",
+                        "description": "One-time event example",
                         "duration": "2:00",
                         "id": 1,
                         "priority": "Medium",
                         "repetition": "Once",
                         "start_time": "12:00",
-                        "title": "一次性事件",
+                        "title": "One-time Event",
                         "type": "schedule"
                     },
                     {
                         "banned": [],
                         "category": "daily",
-                        "description": "每日重复事件示例",
+                        "description": "Daily recurring event example",
                         "end_date": "-1",
                         "id": 2,
                         "priority": "Medium",
                         "repetition": "Daily",
                         "start_date": "-1",
                         "time": "13:00",
-                        "title": "每日事件",
+                        "title": "Daily Event",
                         "type": "point"
                     },
                     {
                         "category": "weekly",
-                        "date": new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 两天后
-                        "description": "每周团队例会，讨论项目进展和下周计划",
+                        "date": new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In two days
+                        "description": "Weekly team meeting to discuss project progress and next week's plan",
                         "duration": "1:30",
                         "id": 3,
                         "priority": "High",
                         "repetition": "Weekly",
                         "start_time": "09:30",
-                        "title": "团队周会",
+                        "title": "Team Weekly Meeting",
                         "type": "schedule"
                     },
                     {
                         "banned": ["Saturday", "Sunday"],
                         "category": "weekday",
-                        "description": "工作日健身计划，保持身体健康",
-                        "end_date": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 一个月后
+                        "description": "Weekday fitness plan to maintain physical health",
+                        "end_date": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In one month
                         "id": 4,
                         "priority": "Medium",
                         "repetition": "Daily",
                         "start_date": new Date().toISOString().split('T')[0],
                         "time": "18:30",
-                        "title": "健身房锻炼",
+                        "title": "Gym Workout",
                         "type": "point"
                     },
                     {
                         "category": "monthly",
-                        "date": new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0], // 下个月第一天
-                        "description": "月度财务总结和预算规划",
+                        "date": new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0], // First day of next month
+                        "description": "Monthly financial summary and budget planning",
                         "duration": "2:00",
                         "id": 5,
                         "priority": "High",
                         "repetition": "Monthly",
                         "start_time": "15:00",
-                        "title": "月度财务会议",
+                        "title": "Monthly Financial Meeting",
                         "type": "schedule"
                     },
                     {
                         "banned": [],
                         "category": "weekend",
-                        "description": "周末家庭聚餐时间",
+                        "description": "Weekend family dinner time",
                         "end_date": "-1",
                         "id": 6,
                         "priority": "Low",
                         "repetition": "Weekly",
                         "start_date": new Date().toISOString().split('T')[0],
                         "time": "19:00",
-                        "title": "家庭晚餐",
+                        "title": "Family Dinner",
                         "type": "point"
                     },
                     {
                         "category": "once",
-                        "date": new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 一周后
-                        "description": "与客户进行项目演示会议",
+                        "date": new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In one week
+                        "description": "Project demonstration meeting with client",
                         "duration": "1:00",
                         "id": 7,
                         "priority": "High",
                         "repetition": "Once",
                         "start_time": "14:00",
-                        "title": "客户演示会",
+                        "title": "Client Demo Meeting",
                         "type": "schedule"
                     },
                     {
                         "banned": [],
                         "category": "daily",
-                        "description": "每日阅读学习时间",
+                        "description": "Daily reading and learning time",
                         "end_date": "-1",
                         "id": 8,
                         "priority": "Medium",
                         "repetition": "Daily",
                         "start_date": "-1",
                         "time": "21:00",
-                        "title": "阅读时间",
+                        "title": "Reading Time",
                         "type": "point"
                     }
                 ]);
@@ -1198,27 +1197,27 @@
             }
         }
 
-        // 生成事件实例（处理重复事件）
+        // Generate event instances (handle recurring events)
         function generateEventInstances(events) {
         const instances = [];
         const today = new Date();
-        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // 上个月
-        const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 0); // 三个月后
+        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Previous month
+        const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 0); // Three months later
         
         events.forEach(event => {
-            // 保存原始事件数据
+            // Save original event data
             const originalEvent = {...event};
             
             if (event.repetition === 'Once') {
-                // 一次性事件 - 检查是否在排除日期内
+                // One-time event - check if in banned dates
                 if (!isDateBanned(new Date(event.date), event.banned)) {
-                    // 修复：使用本地日期格式
+                    // Fix: Use local date format
                     const localDateString = formatLocalDate(new Date(event.date));
                     const instance = createEventInstance(event, localDateString);
                     if (instance) instances.push(instance);
                 }
             } else {
-                // 重复事件 - 生成指定日期范围内的实例
+                // Recurring events - generate instances within specified date range
                 const eventInstances = generateRecurringEvents(event, startDate, endDate);
                 instances.push(...eventInstances);
             }
@@ -1227,7 +1226,7 @@
         return instances;
     }
 
-        // 生成重复事件实例
+        // Generate recurring event instances
         function generateRecurringEvents(event, startDate, endDate) {
             const instances = [];
             const start = event.start_date === '-1' ? startDate : new Date(event.start_date);
@@ -1236,25 +1235,25 @@
             let currentDate = new Date(start);
             
             while (currentDate <= end) {
-                // 检查是否在排除日期内
+                // Check if date is banned
                 if (!isDateBanned(currentDate, event.banned)) {
-                    // 检查是否在启用的日期/星期内
+                    // Check if date is in enabled days/weeks
                     if (isDateEnabled(currentDate, event)) {
-                        // 修复：使用本地日期字符串，避免时区偏移
+                        // Fix: Use local date string to avoid time zone offset
                         const localDateString = formatLocalDate(currentDate);
                         const instance = createEventInstance(event, localDateString);
                         if (instance) instances.push(instance);
                     }
                 }
                 
-                // 移动到下一天
+                // Move to next day
                 currentDate.setDate(currentDate.getDate() + 1);
             }
             
             return instances;
         }
 
-        // 检查日期是否在排除范围内（左闭右闭区间）
+        // Check if date is in banned range (closed interval)
         function isDateBanned(date, bannedRanges) {
             if (!bannedRanges || !bannedRanges.length) return false;
             
@@ -1262,17 +1261,17 @@
                 const start = new Date(range.l);
                 const end = new Date(range.r);
                 
-                // 将开始日期设置为当天的开始时间（00:00:00）
+                // Set start date to beginning of day (00:00:00)
                 const startOfDay = new Date(start);
                 startOfDay.setHours(0, 0, 0, 0);
                 
-                // 将结束日期加一天，然后设置为前一天的结束时间（23:59:59）
+                // Add one day to end date, then set to end of previous day (23:59:59)
                 const endOfDay = new Date(end);
-                endOfDay.setDate(endOfDay.getDate() + 1); // 加一天
-                endOfDay.setHours(0, 0, 0, 0); // 设置为新一天的开始
-                endOfDay.setMilliseconds(endOfDay.getMilliseconds() - 1); // 减1毫秒，得到前一天的结束时间
+                endOfDay.setDate(endOfDay.getDate() + 1); // Add one day
+                endOfDay.setHours(0, 0, 0, 0); // Set to start of new day
+                endOfDay.setMilliseconds(endOfDay.getMilliseconds() - 1); // Subtract 1ms to get end of previous day
                 
-                // 左闭右闭区间比较
+                // Closed interval comparison
                 if (date >= startOfDay && date <= endOfDay) {
                     return true;
                 }
@@ -1281,7 +1280,7 @@
             return false;
         }
 
-        // 添加日期格式化函数，确保使用本地日期
+        // Add date formatting function to ensure local date is used
         function formatLocalDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1289,20 +1288,20 @@
             return `${year}-${month}-${day}`;
         }
 
-        // 检查日期是否在启用范围内（根据重复类型）
+        // Check if date is in enabled range (based on repetition type)
         function isDateEnabled(date, event) {
             if (event.repetition === 'Daily') {
-                return true; // 每天重复
+                return true; // Repeat daily
             } else if (event.repetition === 'Weekly') {
-                // 修复：使用getDay()获取星期几 (0=周日, 1=周一, ..., 6=周六)
+                // Fix: Use getDay() to get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
                 const dayOfWeek = date.getDay();
                 return event.enabled_days && event.enabled_days.includes(dayOfWeek);
             } else if (event.repetition === 'Monthly') {
-                // 检查每月的哪几天
+                // Check specific days of the month
                 const dayOfMonth = date.getDate();
                 return event.enabled_days && event.enabled_days.includes(dayOfMonth);
             } else if (event.repetition === 'Yearly') {
-                // 检查每年的特定日期 (格式: "MM-DD")
+                // Check specific date each year (format: "MM-DD")
                 const monthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                 return event.enabled_days && event.enabled_days.includes(monthDay);
             }
@@ -1310,10 +1309,10 @@
             return false;
         }
 
-        // 创建事件实例
+        // Create event instance
         function createEventInstance(event, date) {
             return {
-                id: `${event.id}-${date}`, // 使用日期确保唯一性
+                id: `${event.id}-${date}`, // Use date to ensure uniqueness
                 type: event.type,
                 title: event.title,
                 description: event.description,
@@ -1329,12 +1328,12 @@
                 end_date: event.end_date,
                 banned: event.banned,
                 enabled_days: event.enabled_days,
-                completed: false, // 默认未完成
-                originalEvent: event // 保存原始事件数据
+                completed: false, // Not completed by default
+                originalEvent: event // Save original event data
             };
         }
 
-        // 导出数据为JSON文件
+        // Export data as JSON file
         function exportData() {
             const dataStr = JSON.stringify({ events: tasks.map(t => t.originalEvent) }, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -1348,27 +1347,27 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
             
-            showToast('数据导出成功！', 'success');
+            showToast('Data exported successfully!', 'success');
         }
 
-        // 更新界面
+        // Update interface
         function updateUI() {
             renderTodayTasks();
             updateStatistics();
             calendar.refetchEvents();
         }
 
-        // 根据优先级获取事件颜色
+        // Get event color based on priority
         function getEventColor(priority) {
             const colors = {
-                High: '#f72585',    // 高优先级 - 红色
-                Medium: '#f8961e', // 中优先级 - 橙色
-                Low: '#4cc9f0'     // 低优先级 - 蓝色
+                High: '#f72585',    // High priority - red
+                Medium: '#f8961e', // Medium priority - orange
+                Low: '#4cc9f0'     // Low priority - blue
             };
-            return colors[priority] || '#4361ee'; // 默认颜色
+            return colors[priority] || '#4361ee'; // Default color
         }
 
-        // 根据优先级获取徽章颜色类
+        // Get badge color class based on priority
         function getPriorityBadgeClass(priority) {
             const classes = {
                 High: 'bg-danger',
@@ -1378,27 +1377,27 @@
             return classes[priority] || 'bg-secondary';
         }
 
-        // 获取优先级文本
+        // Get priority text
         function getPriorityText(priority) {
             const texts = {
-                High: '高',
-                Medium: '中',
-                Low: '低'
+                High: 'High',
+                Medium: 'Medium',
+                Low: 'Low'
             };
-            return texts[priority] || '普通';
+            return texts[priority] || 'Normal';
         }
 
-        // 获取事件类型文本
+        // Get event type text
         function getEventTypeText(type) {
             const texts = {
-                point: '时间点',
-                schedule: '时间段',
-                deadline: '截止时间'
+                point: 'Time Point',
+                schedule: 'Time Period',
+                deadline: 'Deadline'
             };
             return texts[type] || type;
         }
 
-        // 获取事件类型样式类
+        // Get event type style class
         function getEventTypeClass(type) {
             const classes = {
                 point: 'type-point',
@@ -1408,33 +1407,33 @@
             return classes[type] || '';
         }
 
-        // 渲染今日任务
+        // Render today's tasks
         function renderTodayTasks() {
             const today = new Date().toISOString().split('T')[0];
             const todayTasks = tasks.filter(task => task.date === today);
             const container = document.getElementById('today-tasks');
             const countElement = document.getElementById('today-task-count');
             
-            countElement.textContent = `${todayTasks.length}个任务`;
+            countElement.textContent = `${todayTasks.length} tasks`;
             
             if (todayTasks.length === 0) {
-                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>今日无安排，享受轻松的一天！</div>';
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>No schedule for today, enjoy your day!</div>';
                 return;
             }
             
             container.innerHTML = todayTasks.map(task => {
-                // 根据事件类型显示不同的时间信息
+                // Display different time information based on event type
                 let timeInfo = '';
                 if (task.type === 'schedule') {
                     timeInfo = `${task.startTime || '00:00'} - ${task.endTime || '00:00'}`;
                     if (task.endTime && task.endTime < task.startTime) {
-                        timeInfo += ' (跨天)';
+                        timeInfo += ' (Cross-day)';
                     }
                 } else {
                     timeInfo = task.time || '00:00';
                 }
                 
-                // 检查是否为重复事件
+                // Check if it's a recurring event
                 const isRecurring = task.repetition && task.repetition !== 'Once';
                 
                 return `
@@ -1443,22 +1442,22 @@
                         <div class="flex-grow-1">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <h6 class="mb-0 ${task.completed ? 'text-decoration-line-through' : ''}">${task.title}</h6>
-                                <span class="badge ${getPriorityBadgeClass(task.priority)}">${getPriorityText(task.priority)}优先级</span>
+                                <span class="badge ${getPriorityBadgeClass(task.priority)}">${getPriorityText(task.priority)} Priority</span>
                             </div>
                             <div class="d-flex align-items-center mb-1">
                                 <span class="event-type-indicator ${getEventTypeClass(task.type)}">
                                     <i class="bi ${task.type === 'point' ? 'bi-dot' : task.type === 'schedule' ? 'bi-clock' : 'bi-alarm'} me-1"></i>
                                     ${getEventTypeText(task.type)}
                                 </span>
-                                ${isRecurring ? '<span class="recurring-badge">重复</span>' : ''}
+                                ${isRecurring ? '<span class="recurring-badge">Recurring</span>' : ''}
                             </div>
                             ${task.description ? `<p class="mb-1 small text-muted">${task.description}</p>` : ''}
                             <div class="d-flex justify-content-between align-items-center mt-2">
                                 <small class="text-muted"><i class="bi bi-clock me-1"></i>${timeInfo}</small>
                                 <div>
                                     ${task.completed ? 
-                                        '<span class="badge bg-success me-1"><i class="bi bi-check-circle me-1"></i>已完成</span>' : 
-                                        '<span class="badge bg-secondary me-1"><i class="bi bi-clock me-1"></i>待完成</span>'
+                                        '<span class="badge bg-success me-1"><i class="bi bi-check-circle me-1"></i>Completed</span>' : 
+                                        '<span class="badge bg-secondary me-1"><i class="bi bi-clock me-1"></i>Pending</span>'
                                     }
                                     <span class="badge bg-light text-dark">${task.category}</span>
                                 </div>
@@ -1470,11 +1469,11 @@
             }).join('');
         }
 
-        // 更新统计信息
+        // Update statistics
         function updateStatistics() {
             const today = new Date().toISOString().split('T')[0];
             const weekStart = new Date();
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // 本周日开始
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start from this Sunday
             
             const weekTasks = tasks.filter(task => {
                 const taskDate = new Date(task.date);
@@ -1492,61 +1491,61 @@
             document.getElementById('completion-rate').textContent = `${completionRate}%`;
         }
 
-        // 显示任务详情
+        // Show task details
         function showTaskDetails(event) {
             const task = event.extendedProps;
             
-            // 根据事件类型设置时间信息
+            // Set time information based on event type
             let timeInfo = '';
             if (task.type === 'schedule') {
                 const startTime = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 const endTime = event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 timeInfo = `${startTime} - ${endTime}`;
                 
-                // 如果是跨天事件，添加提示
+                // Add note if it's a cross-day event
                 if (task.endTime && task.endTime < task.startTime) {
-                    timeInfo += ' (跨天事件)';
+                    timeInfo += ' (Cross-day Event)';
                 }
             } else {
                 timeInfo = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
             
-            // 计算持续时间（仅对schedule类型有效）
+            // Calculate duration (only for schedule type)
             let durationText = '';
             if (task.type === 'schedule') {
                 const durationMs = event.end - event.start;
                 const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
                 const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
                 durationText = durationHours > 0 ? 
-                    `${durationHours}小时${durationMinutes > 0 ? `${durationMinutes}分钟` : ''}` : 
-                    `${durationMinutes}分钟`;
+                    `${durationHours}h${durationMinutes > 0 ? `${durationMinutes}m` : ''}` : 
+                    `${durationMinutes}m`;
             }
             
-            // 设置类别图标
+            // Set category icons
             const categoryIcons = {
-                '学习': 'bi-journal-text',
-                '工作': 'bi-briefcase',
-                '个人': 'bi-person',
-                '健康': 'bi-heart',
-                '社交': 'bi-people'
+                'Study': 'bi-journal-text',
+                'Work': 'bi-briefcase',
+                'Personal': 'bi-person',
+                'Health': 'bi-heart',
+                'Social': 'bi-people'
             };
             
-            // 填充模态框内容
+            // Populate modal content
             document.getElementById('taskDetailTitle').textContent = event.title;
-            document.getElementById('taskDetailDescription').textContent = task.description || '暂无描述';
-            document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + '优先级';
+            document.getElementById('taskDetailDescription').textContent = task.description || 'No description';
+            document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + ' Priority';
             document.getElementById('taskDetailPriority').className = 'badge ' + getPriorityBadgeClass(task.priority);
             document.getElementById('taskDetailCategory').textContent = task.category;
-            document.getElementById('taskDetailStatus').textContent = task.completed ? '已完成' : '待完成';
+            document.getElementById('taskDetailStatus').textContent = task.completed ? 'Completed' : 'Pending';
             document.getElementById('taskDetailStatus').className = task.completed ? 'task-status status-completed' : 'task-status status-pending';
-            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('zh-CN');
+            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('en-US');
             document.getElementById('taskDetailTime').textContent = timeInfo;
             document.getElementById('taskDetailType').textContent = getEventTypeText(task.type);
-            document.getElementById('taskDetailRepetition').textContent = task.repetition || '一次性';
+            document.getElementById('taskDetailRepetition').textContent = task.repetition || 'One-time';
             document.getElementById('taskCategoryIcon').className = categoryIcons[task.category] || 'bi-tag';
             document.getElementById('taskDetailCategoryFull').textContent = task.category;
             
-            // 处理重复事件详情
+            // Handle recurring event details
             const recurrenceDetails = document.getElementById('recurrenceDetails');
             const recurringBadge = document.getElementById('taskDetailRecurring');
             
@@ -1555,30 +1554,30 @@
                 recurringBadge.style.display = 'inline-flex';
                 
                 document.getElementById('taskDetailStartDate').textContent = 
-                    task.start_date === '-1' ? '无限制' : new Date(task.start_date).toLocaleDateString('zh-CN');
+                    task.start_date === '-1' ? 'Unlimited' : new Date(task.start_date).toLocaleDateString('en-US');
                 document.getElementById('taskDetailEndDate').textContent = 
-                    task.end_date === '-1' ? '无限制' : new Date(task.end_date).toLocaleDateString('zh-CN');
+                    task.end_date === '-1' ? 'Unlimited' : new Date(task.end_date).toLocaleDateString('en-US');
                 
-                // 处理排除日期
+                // Handle banned dates
                 if (task.banned && task.banned.length > 0) {
                     const bannedText = task.banned.map(range => 
-                        `${new Date(range.l).toLocaleDateString('zh-CN')} 至 ${new Date(range.r).toLocaleDateString('zh-CN')}`
+                        `${new Date(range.l).toLocaleDateString('en-US')} to ${new Date(range.r).toLocaleDateString('en-US')}`
                     ).join('; ');
                     document.getElementById('taskDetailBanned').textContent = bannedText;
                 } else {
-                    document.getElementById('taskDetailBanned').textContent = '无';
+                    document.getElementById('taskDetailBanned').textContent = 'None';
                 }
             } else {
                 recurrenceDetails.style.display = 'none';
                 recurringBadge.style.display = 'none';
             }
             
-            // 显示模态框
+            // Show modal
             const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
             modal.show();
         }
 
-        // 设置事件监听器
+        // Set up event listeners
         function setupEventListeners() {
             document.getElementById('refresh-data').addEventListener('click', async function() {
                 await loadTaskData();
@@ -1599,63 +1598,62 @@
                 exportData();
             });
 
-            // 添加主题选择模态框初始化
-            // 添加主题选择模态框初始化
+            // Initialize theme selector modal
             initializeThemeSelector();
             
-            // 页面加载时应用保存的主题
+            // Apply saved theme on page load
             const savedTheme = localStorage.getItem('theme') || 'blue';
             changeTheme(savedTheme);
         }
 
-        // 修改initializeThemeSelector函数
+        // Modify initializeThemeSelector function
         function initializeThemeSelector() {
             const themeOptions = [
                 {
                     id: 'blue',
-                    name: '蓝色主题',
-                    description: '专业、冷静、专注',
+                    name: 'Blue Theme',
+                    description: 'Professional, calm, focused',
                     primary: '#4361ee',
                     secondary: '#3f37c9'
                 },
                 {
                     id: 'green',
-                    name: '绿色主题',
-                    description: '自然、成长、平衡',
+                    name: 'Green Theme',
+                    description: 'Natural, growing, balanced',
                     primary: '#4cc9f0',
                     secondary: '#4895ef'
                 },
                 {
                     id: 'purple',
-                    name: '紫色主题',
-                    description: '创意、神秘、优雅',
+                    name: 'Purple Theme',
+                    description: 'Creative, mysterious, elegant',
                     primary: '#7209b7',
                     secondary: '#560bad'
                 },
                 {
                     id: 'orange',
-                    name: '橙色主题',
-                    description: '活力、热情、温暖',
+                    name: 'Orange Theme',
+                    description: 'Energetic, passionate, warm',
                     primary: '#f8961e',
                     secondary: '#f3722c'
                 },
                 {
                     id: 'red',
-                    name: '红色主题',
-                    description: '紧急、重要、活力',
+                    name: 'Red Theme',
+                    description: 'Urgent, important, dynamic',
                     primary: '#f72585',
                     secondary: '#b5179e'
                 },
                 {
                     id: 'teal',
-                    name: '青色主题',
-                    description: '清新、现代、平静',
+                    name: 'Teal Theme',
+                    description: 'Fresh, modern, calm',
                     primary: '#06d6a0',
                     secondary: '#04966b'
                 }
             ];
             
-            // 生成主题选项
+            // Generate theme options
             const themeOptionsContainer = document.getElementById('theme-options');
             themeOptionsContainer.innerHTML = themeOptions.map(theme => `
                 <div class="col-md-4">
@@ -1669,32 +1667,32 @@
                 </div>
             `).join('');
             
-            // 添加主题选择事件 - 即时应用主题但不关闭弹窗
+            // Add theme selection event - apply theme immediately without closing popup
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.addEventListener('click', function() {
                     const selectedTheme = this.getAttribute('data-theme');
                     
-                    // 移除所有active类
+                    // Remove all active classes
                     document.querySelectorAll('.theme-option').forEach(opt => {
                         opt.classList.remove('active');
                     });
                     
-                    // 添加active类到当前选项
+                    // Add active class to current option
                     this.classList.add('active');
                     
-                    // 立即应用主题
+                    // Apply theme immediately
                     changeTheme(selectedTheme);
                     
-                    // 更新当前主题名称显示
+                    // Update current theme name display
                     const themeName = themeOptions.find(t => t.id === selectedTheme).name;
                     document.getElementById('current-theme-name').textContent = themeName;
                     
-                    // 显示即时反馈
+                    // Show immediate feedback
                     showThemeAppliedFeedback(this);
                 });
             });
             
-            // 模态框显示时初始化选择状态
+            // Initialize selection state when modal is shown
             document.getElementById('themeSelectorModal').addEventListener('show.bs.modal', function() {
                 const currentTheme = localStorage.getItem('theme') || 'blue';
                 const currentOption = document.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
@@ -1703,26 +1701,26 @@
                 document.getElementById('current-theme-name').textContent = themeName;
                 
                 if (currentOption) {
-                    // 移除所有active类
+                    // Remove all active classes
                     document.querySelectorAll('.theme-option').forEach(opt => {
                         opt.classList.remove('active');
                     });
                     
-                    // 添加active类到当前主题
+                    // Add active class to current theme
                     currentOption.classList.add('active');
                 }
             });
         }
 
-        // 添加主题应用反馈函数
+        // Add theme application feedback function
         function showThemeAppliedFeedback(element) {
-            // 添加应用反馈动画
+            // Add application feedback animation
             element.classList.add('theme-applied');
             
-            // 创建反馈元素
+            // Create feedback element
             const feedback = document.createElement('div');
             feedback.className = 'theme-feedback';
-            feedback.textContent = '✓ 已应用';
+            feedback.textContent = '✓ Applied';
             feedback.style.cssText = `
                 position: absolute;
                 top: 50%;
@@ -1740,21 +1738,21 @@
             
             element.appendChild(feedback);
             
-            // 移除反馈元素
+            // Remove feedback element
             setTimeout(() => {
                 feedback.remove();
                 element.classList.remove('theme-applied');
             }, 1000);
         }
 
-        // 修改changeTheme函数，添加更流畅的过渡
+        // Modify changeTheme function with smoother transition
         function changeTheme(theme) {
             const root = document.documentElement;
             
-            // 添加主题切换过渡类
+            // Add theme switch transition class
             document.body.classList.add('theme-changing');
             
-            // 根据选择的主题更新CSS变量
+            // Update CSS variables based on selected theme
             switch(theme) {
                 case 'green':
                     root.style.setProperty('--primary-color', '#4cc9f0');
@@ -1787,34 +1785,34 @@
                     root.style.setProperty('--primary-color-rgb', '67, 97, 238');
             }
             
-            // 保存主题选择到localStorage
+            // Save theme selection to localStorage
             localStorage.setItem('theme', theme);
             
-            // 移除过渡类
+            // Remove transition class
             setTimeout(() => {
                 document.body.classList.remove('theme-changing');
             }, 500);
             
-            // 显示主题切换提示（使用更轻量的提示）
-            showThemeToast(`已切换到${getThemeName(theme)}主题`);
+            // Show theme switch notification (using lighter notification)
+            showThemeToast(`Switched to ${getThemeName(theme)} theme`);
         }
 
-        // 获取主题名称
+        // Get theme name
         function getThemeName(themeId) {
             const themeNames = {
-                'blue': '蓝色',
-                'green': '绿色',
-                'purple': '紫色',
-                'orange': '橙色',
-                'red': '红色',
-                'teal': '青色'
+                'blue': 'Blue',
+                'green': 'Green',
+                'purple': 'Purple',
+                'orange': 'Orange',
+                'red': 'Red',
+                'teal': 'Teal'
             };
-            return themeNames[themeId] || '默认';
+            return themeNames[themeId] || 'Default';
         }
 
-        // 添加轻量级主题切换提示
+        // Add lightweight theme switch notification
         function showThemeToast(message) {
-            // 创建轻量级提示元素
+            // Create lightweight notification element
             const toast = document.createElement('div');
             toast.className = 'theme-toast';
             toast.textContent = message;
@@ -1835,7 +1833,7 @@
             
             document.body.appendChild(toast);
             
-            // 自动移除提示
+            // Auto remove notification
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => {
@@ -1846,23 +1844,23 @@
             }, 2000);
         }
 
-        // 显示加载状态
+        // Show loading state
         function showLoadingState() {
             document.getElementById('today-tasks').innerHTML = `
                 <div class="text-center p-4 text-muted">
                     <div class="loading-spinner mb-2"></div>
-                    <div>加载任务中...</div>
+                    <div>Loading tasks...</div>
                 </div>
             `;
             
-            document.getElementById('today-task-count').textContent = '加载中...';
+            document.getElementById('today-task-count').textContent = 'Loading...';
             document.getElementById('total-tasks').textContent = '-';
             document.getElementById('completed-tasks').textContent = '-';
             document.getElementById('high-priority-tasks').textContent = '-';
             document.getElementById('completion-rate').textContent = '-';
         }
 
-        // 显示Toast通知
+        // Show Toast notification
         function showToast(message, type) {
             const toastElement = type === 'success' ? 
                 document.getElementById('successToast') : 
@@ -1878,22 +1876,22 @@
             toast.show();
         }
         
-        // 导出PDF功能
+        // Export PDF function
         document.getElementById('export-pdf').addEventListener('click', function() {
-            // 保存当前任务数据到localStorage
+            // Save current task data to localStorage
             localStorage.setItem('pdfExportData', JSON.stringify(tasks));
             
-            // 获取当前日历状态
+            // Get current calendar state
             const currentDate = calendar.getDate();
             const currentView = calendar.view.type;
             
-            // 构建导出URL
+            // Build export URL
             const params = new URLSearchParams({
                 view: currentView,
                 date: currentDate.toISOString().split('T')[0]
             });
             
-            // 打开导出页面
+            // Open export page
             window.open(`pdf-export.html?${params.toString()}`, '_blank');
         });
     </script>
