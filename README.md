@@ -1,5 +1,5 @@
 # Planalyze - Lightweight Scheduling & Task Management Project
-
+![](/readmepic/en.png)
 [中文版本](README-zh.md)
 
 ## Project Introduction
