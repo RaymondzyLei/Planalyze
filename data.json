@@ -8,9 +8,10 @@
             "id": 1,
             "priority": "High",
             "repetition": "Once",
-            "time": "12:00",
+            "start_time": "12:00",
+            "end_time": "15:30",
             "title": "1",
-            "type": "deadline"
+            "type": "schedule"
         }
     ],
     "total": 1
