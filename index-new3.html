@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能日程规划器 - Planalyze</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    
+    <style>
+                :root {
+            /* 当前主题变量（默认蓝色） */
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --primary-color-rgb: 67, 97, 238;
+            
+            /* 其他颜色保持不变 */
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        /* 添加背景图片样式 */
+        body {
+            background-image: url('data/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #f8f9fa; /* 备用背景色 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            position: relative;
+            min-height: 100vh;
+        }
+        body::before {
+            display: none; /* 移除遮罩层 */
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.85); /* 卡片透明度更高 */
+        }
+        
+
+        /* 确保主要内容区域有更好的可读性 */
+        .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* 卡片背景增加透明度，让背景图隐约可见 */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+            background-color: rgba(255, 255, 255, 0.95); /* 增加透明度 */
+        }
+        
+        /* 导航栏也增加透明度 */
+        .navbar {
+            background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.95), rgba(63, 55, 201, 0.95)) !important;
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+        }
+        
+        /* 页脚背景也增加透明度 */
+        footer {
+            background-color: rgba(33, 37, 41, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* 模态框背景也增加透明度 */
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+        }
+        /* 全局主题切换过渡效果 */
+        body.theme-changing * {
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+        }
+
+        /* 特定元素的过渡效果 */
+        .navbar, .card, .btn, .fc-toolbar, .fc-event {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+        }
+
+        /* 主题提示动画 */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            padding: 1rem 1.5rem;
+            border: none;
+        }
+        
+        .task-item {
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+        }
+        
+        .task-item:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .priority-high {
+            border-left-color: var(--danger-color);
+        }
+        
+        .priority-medium {
+            border-left-color: var(--warning-color);
+        }
+        
+        .priority-low {
+            border-left-color: var(--success-color);
+        }
+        
+        .stats-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        /*
+        .fc {
+            border-radius: 0 0 12px 12px;
+            height: 650px;
+        }
+        */
+        .fc {
+            border-radius: 0 0 12px 12px;
+            height: 80vh;
+            min-height: 500px;
+            max-height: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .fc {
+                height: 60vh;
+                min-height: 400px;
+                max-height: 600px;
+            }
+        }
+        /* 移除日历日期下划线 */
+        .fc-daygrid-day-number {
+            text-decoration: none !important;
+        }
+        /* 可选：同时移除其他可能的下划线 */
+        .fc-col-header-cell-cushion {
+            text-decoration: none !important;
+        }
+        .fc-toolbar {
+            padding: 1rem 1.5rem;
+            margin-bottom: 0;
+            background-color: white;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .fc-toolbar-title {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .fc-button {
+            background-color: var(--primary-color) !important;
+            border: none !important;
+            border-radius: 6px !important;
+        }
+        
+        .fc-button:hover {
+            background-color: var(--secondary-color) !important;
+        }
+        
+        .fc-daygrid-event {
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 0.85rem;
+        }
+        
+        .fc-event-title {
+            font-weight: 500;
+        }
+        
+        /* 修改Deadline事件渲染样式 */
+        .fc-event.deadline-event {
+            background-color: rgba(247, 37, 133, 0.2) !important;
+            border: 2px dashed #f72585 !important;
+            color: #f72585 !important;
+            font-weight: 600;
+        }
+        
+        /* 跨天事件样式保持不变 */
+        .fc-event.multi-day-event {
+            border-left: 4px dashed var(--warning-color);
+        }
+        
+        /* 确保Deadline事件在日历中突出显示 */
+        .fc-daygrid-event.deadline-event .fc-event-title {
+            font-weight: 700;
+        }
+        
+        /* 在月视图中为Deadline事件添加特殊标记 */
+        .fc-daygrid-event.deadline-event:before {
+            content: "!";
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #f72585;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            margin-right: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .badge {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.4rem 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 80px;
+            min-height: 24px;
+        }
+        
+        .priority-high .badge,
+        .priority-medium .badge,
+        .priority-low .badge {
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+        }
+        
+        @media (max-width: 768px) {
+            .fc-toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .fc-toolbar-chunk {
+                margin-bottom: 0.5rem;
+            }
+            
+            .toast {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            
+            .fc {
+                height: 500px;
+            }
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .sidebar-card {
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-card .card-body {
+            padding: 1rem;
+        }
+        
+        .sidebar-card h5 {
+            font-size: 1.1rem;
+        }
+        
+        .sidebar-card .stats-number {
+            font-size: 1.8rem;
+        }
+        
+        .sidebar-card .btn {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        /* 任务详情模态框样式 */
+        .task-detail-modal .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .task-detail-modal .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+        
+        .task-detail-modal .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .task-detail-modal .modal-footer {
+            border: none;
+            padding: 1rem 1.5rem 1.5rem;
+            background-color: #f8f9fa;
+        }
+        /*主题选择弹窗部分*/
+        /* 主题选择器样式增强 */
+        .theme-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .theme-option.active::after {
+            content: "✓";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* 主题应用动画 */
+        @keyframes themeApplied {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .theme-option.theme-applied {
+            animation: themeApplied 0.5s ease;
+        }
+
+        .theme-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .theme-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .theme-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        /* 修改任务详情弹窗标签高度 */
+        .task-detail-modal .badge {
+            padding: 0.25rem 0.5rem; /* 减小内边距 */
+            font-size: 0.9rem; /* 减小字体大小 */
+            min-height: 20px; /* 减小最小高度 */
+            line-height: 1.2; /* 调整行高 */
+        }
+
+        /* 调整模态框内徽章布局 */
+        .task-detail-modal .task-meta {
+            gap: 0.3rem; /* 减小徽章间距 */
+        }
+
+        /* 调整状态标签样式 */
+        .task-detail-modal .task-status {
+            padding: 0.25rem 0.75rem; /* 减小状态标签内边距 */
+            font-size: 0.8rem; /* 减小状态标签字体 */
+        }
+
+        /* 确保图标与文字对齐 */
+        .task-detail-modal .task-detail-value {
+            align-items: center;
+        }
+
+        .task-detail-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        
+        .task-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .task-description {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .task-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .task-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .task-detail-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+        
+        .task-detail-value {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-detail-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .priority-high .task-detail-icon {
+            background-color: var(--danger-color);
+        }
+        
+        .priority-medium .task-detail-icon {
+            background-color: var(--warning-color);
+        }
+        
+        .priority-low .task-detail-icon {
+            background-color: var(--success-color);
+        }
+        
+        .task-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .status-completed {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-pending {
+            background-color: rgb(255, 0, 0);
+            color: #00ffff;
+        }
+        
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+        
+        /* 事件类型指示器 */
+        .event-type-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+        
+        .type-point {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .type-schedule {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+        
+        .type-deadline {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calendar-check me-2"></i>Planalyze
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="bi bi-house me-1"></i>首页
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-pdf">
+                            <i class="bi bi-file-pdf me-1"></i>导出PDF
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-data">
+                            <i class="bi bi-download me-1"></i>导出数据
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <div class="container my-4">
+        <!-- 欢迎横幅 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-4 text-white rounded-3" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                    <h1 class="display-6 mb-2">欢迎使用 Planalyze</h1>
+                    <p class="mb-0">智能时间编织者 - 高效规划您的学习与生活</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- 左侧：日历和任务列表 -->
+            <div class="col-lg-10">
+                <!-- 日历区域 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-calendar-week me-2"></i>我的日历
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+                
+                <!-- 任务列表 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-task me-2"></i>今日任务
+                        </h5>
+                        <span class="badge bg-light text-dark" id="today-task-count">加载中...</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="today-tasks">
+                            <div class="text-center p-4 text-muted">
+                                <div class="loading-spinner mb-2"></div>
+                                <div>加载任务中...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：统计信息和快速操作 -->
+            <div class="col-lg-2">
+                <!-- 统计信息 -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up me-2"></i>本周统计
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stats-number" id="total-tasks">-</div>
+                                <small class="text-muted">总任务数</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-number" id="completed-tasks">-</div>
+                                <small class="text-muted">已完成</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="stats-number" id="high-priority-tasks">-</div>
+                                <small class="text-muted">高优先级</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="stats-number" id="completion-rate">-</div>
+                                <small class="text-muted">完成率</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 快速操作 -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-lightning me-2"></i>快速操作
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" id="refresh-data">
+                                <i class="bi bi-arrow-repeat me-2"></i>刷新数据
+                            </button>
+                            <button class="btn btn-outline-primary" id="toggle-view">
+                                <i class="bi bi-calendar-week me-2"></i>切换视图
+                            </button>
+                            <button class="btn btn-outline-primary" id="theme-selector-btn" data-bs-toggle="modal" data-bs-target="#themeSelectorModal">
+                                <i class="bi bi-palette me-2"></i>选择主题
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 功能特性 -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-stars me-2"></i>功能特性
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">多类型事件</h6>
+                                <small class="text-muted">支持三种事件</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-diagram-3"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">事件分组</h6>
+                                <small class="text-muted">支持分组和重复</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-share"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">数据导出</h6>
+                                <small class="text-muted">支持导出数据</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-eyedropper"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">切换主题</h6>
+                                <small class="text-muted">支持六种主题</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务详情模态框 -->
+    <div class="modal fade task-detail-modal" id="taskDetailModal" tabindex="-1" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="task-detail-header w-100">
+                        <div>
+                            <h5 class="task-title mb-1" id="taskDetailTitle">任务标题</h5>
+                            <div class="task-meta">
+                                <span class="badge" id="taskDetailPriority">高优先级</span>
+                                <span class="badge bg-light text-dark" id="taskDetailCategory">学习</span>
+                                <span class="task-status" id="taskDetailStatus">待完成</span>
+                            </div>
+                        </div>
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="关闭">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="task-description" id="taskDetailDescription">
+                        任务描述将显示在这里...
+                    </div>
+                    
+                    <div class="task-detail-grid">
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-calendar me-1"></i>日期</span>
+                            <span class="task-detail-value" id="taskDetailDate">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-clock me-1"></i>时间</span>
+                            <span class="task-detail-value" id="taskDetailTime">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-tag me-1"></i>事件类型</span>
+                            <span class="task-detail-value" id="taskDetailType">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-diagram-3 me-1"></i>事件组</span>
+                            <span class="task-detail-value" id="taskDetailGroup">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-item">
+                        <span class="task-detail-label"><i class="bi bi-tags me-1"></i>任务类别</span>
+                        <span class="task-detail-value">
+                            <span class="task-detail-icon">
+                                <i class="bi" id="taskCategoryIcon"></i>
+                            </span>
+                            <span id="taskDetailCategoryFull">-</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 主题选择模态框 -->
+    <div class="modal fade" id="themeSelectorModal" tabindex="-1" aria-labelledby="themeSelectorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themeSelectorModalLabel">
+                        <i class="bi bi-palette me-2"></i>选择主题颜色（选择后立即生效）
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row g-3" id="theme-options">
+                            <!-- 主题选项将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <small class="text-muted">当前主题：<span id="current-theme-name">蓝色主题</span></small>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 通知Toast -->
+    <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="toastMessage">操作成功！</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorToastMessage">操作失败！</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Planalyze - 智能日程规划器</h5>
+                    <p>支持多类型事件和事件分组的日程管理工具</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>Copyright &copy; 2025 Planalyze. 基于 <a href="LICENSE">MIT 许可证</a>.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/zh-cn.js"></script>
+    
+    <script>
+        // 全局变量
+        let tasks = [];
+        let calendar;
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 初始化日历
+            initializeCalendar();
+            
+            // 加载任务数据
+            await loadTaskData();
+            
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        // 初始化FullCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'zh-cn',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: '今天',
+                    month: '月',
+                    week: '周',
+                    day: '日'
+                },
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    // 将任务转换为FullCalendar事件格式
+                    const events = tasks.map(task => {
+                        let start, end;
+                        
+                        // 根据事件类型设置开始和结束时间
+                        if (task.type === 'schedule') {
+                            start = `${task.date}T${task.startTime}`;
+                            
+                            // 处理跨天事件
+                            if (task.endTime < task.startTime) {
+                                // 结束时间比开始时间早，表示跨天事件
+                                const nextDay = new Date(task.date);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                const nextDayStr = nextDay.toISOString().split('T')[0];
+                                end = `${nextDayStr}T${task.endTime}`;
+                            } else {
+                                end = `${task.date}T${task.endTime}`;
+                            }
+                        } else {
+                            // point和deadline类型使用time字段
+                            start = `${task.date}T${task.time}`;
+                            end = start; // 单点事件，结束时间与开始时间相同
+                        }
+                        
+                        // 为Deadline事件添加特殊样式类
+                        let className = '';
+                        if (task.type === 'deadline') {
+                            className = 'deadline-event';
+                        } else if (task.type === 'schedule' && task.endTime < task.startTime) {
+                            className = 'multi-day-event';
+                        }
+                        
+                        return {
+                            id: task.id,
+                            title: task.title,
+                            start: start,
+                            end: end,
+                            extendedProps: {
+                                type: task.type,
+                                gid: task.gid,
+                                rid: task.rid,
+                                priority: task.priority,
+                                category: task.category,
+                                description: task.description,
+                                completed: task.completed,
+                                time: task.time,
+                                startTime: task.startTime,
+                                endTime: task.endTime
+                            },
+                            backgroundColor: getEventColor(task.priority),
+                            borderColor: getEventColor(task.priority),
+                            className: className
+                        };
+                    });
+                    successCallback(events);
+                },
+                eventClick: function(info) {
+                    showTaskDetails(info.event);
+                }
+            });
+            
+            calendar.render();
+        }
+
+        // 从外部JSON文件加载任务数据
+        async function loadTaskData() {
+            try {
+                showLoadingState();
+                /*
+                // 模拟从外部文件加载数据
+                await new Promise(resolve => setTimeout(resolve, 800));
+                const response = await fetch('data/schedule2.json');
+                if (!response.ok) throw new Error('无法加载数据文件');
+                const data = await response.json();
+                tasks = data.schedule || [];
+                */
+                // 定义要加载的JSON文件列表
+                const dataFiles = [
+                    'data/schedule1.json',
+                    'data/schedule2.json',
+                    'data/schedule3.json'
+                ];
+                
+                // 使用Promise.all并行加载所有文件
+                const responses = await Promise.all(
+                    dataFiles.map(file => fetch(file))
+                );
+                
+                // 检查所有响应是否成功
+                for (const response of responses) {
+                    if (!response.ok) {
+                        throw new Error(`无法加载数据文件: ${response.url}`);
+                    }
+                }
+                
+                // 解析所有JSON数据
+                const dataSets = await Promise.all(
+                    responses.map(response => response.json())
+                );
+                
+                // 合并所有任务数据
+                tasks = [];
+                dataSets.forEach(data => {
+                    if (data.schedule && Array.isArray(data.schedule)) {
+                        tasks = tasks.concat(data.schedule);
+                    }
+                });
+                /*
+                // 模拟数据 - 扩展了事件类型和属性
+                tasks = [
+                    {
+                        id: 1,
+                        type: "schedule",
+                        gid: 1,
+                        rid: 1,
+                        title: "完成数据结构大作业",
+                        description: "实现图的最短路径算法并撰写实验报告。需要完成Dijkstra算法和Floyd算法的实现，并比较它们的性能差异。",
+                        date: new Date().toISOString().split('T')[0],
+                        startTime: "14:00",
+                        endTime: "16:00",
+                        priority: "high",
+                        category: "学习",
+                        completed: false
+                    },
+                    {
+                        id: 2,
+                        type: "schedule",
+                        gid: 2,
+                        rid: 1,
+                        title: "小组项目会议",
+                        description: "讨论项目进度和下一步分工，确定最终交付时间。",
+                        date: new Date().toISOString().split('T')[0],
+                        startTime: "10:00",
+                        endTime: "11:30",
+                        priority: "medium",
+                        category: "工作",
+                        completed: false
+                    },
+                    {
+                        id: 3,
+                        type: "point",
+                        gid: 3,
+                        rid: 1,
+                        title: "阅读技术文档",
+                        description: "学习新的前端框架特性，特别是关于状态管理和组件通信的部分。",
+                        date: new Date().toISOString().split('T')[0],
+                        time: "20:00",
+                        priority: "low",
+                        category: "学习",
+                        completed: true
+                    },
+                    {
+                        id: 4,
+                        type: "deadline",
+                        gid: 4,
+                        rid: 1,
+                        title: "数学期末考试",
+                        description: "线性代数期末考试，重点复习矩阵运算和特征值问题。",
+                        date: new Date(Date.now() + 86400000).toISOString().split('T')[0], // 明天
+                        time: "09:00",
+                        priority: "high",
+                        category: "学习",
+                        completed: false
+                    },
+                    {
+                        id: 5,
+                        type: "schedule",
+                        gid: 5,
+                        rid: 1,
+                        title: "跨天项目工作",
+                        description: "需要连续工作到第二天凌晨的项目任务。",
+                        date: new Date(Date.now() + 172800000).toISOString().split('T')[0], // 后天
+                        startTime: "22:00",
+                        endTime: "02:00", // 结束时间比开始时间早，表示跨天事件
+                        priority: "medium",
+                        category: "工作",
+                        completed: false
+                    },
+                    {
+                        id: 6,
+                        type: "deadline",
+                        gid: 6,
+                        rid: 1,
+                        title: "提交项目报告",
+                        description: "项目最终报告提交截止日期。",
+                        date: new Date(Date.now() + 259200000).toISOString().split('T')[0], // 大后天
+                        time: "23:59",
+                        priority: "high",
+                        category: "工作",
+                        completed: false
+                    }
+                ];
+                */
+                // 更新界面
+                updateUI();
+                showToast('数据加载成功！', 'success');
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                showToast('无法加载任务数据: ' + error.message, 'error');
+            }
+        }
+
+        // 导出数据为JSON文件
+        function exportData() {
+            const dataStr = JSON.stringify({ schedule: tasks }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'schedule-data.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('数据导出成功！', 'success');
+        }
+        // 导出PDF功能
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            // 保存当前任务数据到localStorage
+            localStorage.setItem('pdfExportData', JSON.stringify(tasks));
+            
+            // 获取当前日历状态
+            const currentDate = calendar.getDate();
+            const currentView = calendar.view.type;
+            
+            // 构建导出URL
+            const params = new URLSearchParams({
+                view: currentView,
+                date: currentDate.toISOString().split('T')[0]
+            });
+            
+            // 打开导出页面
+            window.open(`pdf-export.html?${params.toString()}`, '_blank');
+        });
+        // 更新界面
+        function updateUI() {
+            renderTodayTasks();
+            updateStatistics();
+            calendar.refetchEvents();
+        }
+
+        // 根据优先级获取事件颜色
+        function getEventColor(priority) {
+            const colors = {
+                high: '#f72585',    // 高优先级 - 红色
+                medium: '#f8961e', // 中优先级 - 橙色
+                low: '#4cc9f0'     // 低优先级 - 蓝色
+            };
+            return colors[priority] || '#4361ee'; // 默认颜色
+        }
+
+        // 根据优先级获取徽章颜色类
+        function getPriorityBadgeClass(priority) {
+            const classes = {
+                high: 'bg-danger',
+                medium: 'bg-warning',
+                low: 'bg-success'
+            };
+            return classes[priority] || 'bg-secondary';
+        }
+
+        // 获取优先级文本
+        function getPriorityText(priority) {
+            const texts = {
+                high: '高',
+                medium: '中',
+                low: '低'
+            };
+            return texts[priority] || '普通';
+        }
+
+        // 获取事件类型文本
+        function getEventTypeText(type) {
+            const texts = {
+                point: '时间点',
+                schedule: '时间段',
+                deadline: '截止时间'
+            };
+            return texts[type] || type;
+        }
+
+        // 获取事件类型样式类
+        function getEventTypeClass(type) {
+            const classes = {
+                point: 'type-point',
+                schedule: 'type-schedule',
+                deadline: 'type-deadline'
+            };
+            return classes[type] || '';
+        }
+
+        // 渲染今日任务
+        function renderTodayTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayTasks = tasks.filter(task => task.date === today);
+            const container = document.getElementById('today-tasks');
+            const countElement = document.getElementById('today-task-count');
+            
+            countElement.textContent = `${todayTasks.length}个任务`;
+            
+            if (todayTasks.length === 0) {
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>今日无安排，享受轻松的一天！</div>';
+                return;
+            }
+            
+            container.innerHTML = todayTasks.map(task => {
+                // 根据事件类型显示不同的时间信息
+                let timeInfo = '';
+                if (task.type === 'schedule') {
+                    timeInfo = `${task.startTime} - ${task.endTime}`;
+                    if (task.endTime < task.startTime) {
+                        timeInfo += ' (跨天)';
+                    }
+                } else {
+                    timeInfo = task.time;
+                }
+                
+                return `
+                <div class="list-group-item task-item priority-${task.priority} ${task.completed ? 'opacity-50' : ''}">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 ${task.completed ? 'text-decoration-line-through' : ''}">${task.title}</h6>
+                                <span class="badge ${getPriorityBadgeClass(task.priority)}">${getPriorityText(task.priority)}优先级</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="event-type-indicator ${getEventTypeClass(task.type)}">
+                                    <i class="bi ${task.type === 'point' ? 'bi-dot' : task.type === 'schedule' ? 'bi-clock' : 'bi-alarm'} me-1"></i>
+                                    ${getEventTypeText(task.type)}
+                                </span>
+                                ${task.gid ? `<small class="text-muted">组: ${task.gid}.${task.rid}</small>` : ''}
+                            </div>
+                            ${task.description ? `<p class="mb-1 small text-muted">${task.description}</p>` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>${timeInfo}</small>
+                                <div>
+                                    ${task.completed ? 
+                                        '<span class="badge bg-success me-1"><i class="bi bi-check-circle me-1"></i>已完成</span>' : 
+                                        '<span class="badge bg-secondary me-1"><i class="bi bi-clock me-1"></i>待完成</span>'
+                                    }
+                                    <span class="badge bg-light text-dark">${task.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // 更新统计信息
+        function updateStatistics() {
+            const totalTasks = tasks.length;
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const highPriorityTasks = tasks.filter(task => task.priority === 'high').length;
+            const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+            document.getElementById('high-priority-tasks').textContent = highPriorityTasks;
+            document.getElementById('completion-rate').textContent = `${completionRate}%`;
+        }
+
+        // 显示任务详情
+        function showTaskDetails(event) {
+            const task = event.extendedProps;
+            
+            // 根据事件类型设置时间信息
+            let timeInfo = '';
+            if (task.type === 'schedule') {
+                const startTime = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const endTime = event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                timeInfo = `${startTime} - ${endTime}`;
+                
+                // 如果是跨天事件，添加提示
+                if (task.endTime < task.startTime) {
+                    timeInfo += ' (跨天事件)';
+                }
+            } else {
+                timeInfo = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            // 计算持续时间（仅对schedule类型有效）
+            let durationText = '';
+            if (task.type === 'schedule') {
+                const durationMs = event.end - event.start;
+                const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+                const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+                durationText = durationHours > 0 ? 
+                    `${durationHours}小时${durationMinutes > 0 ? `${durationMinutes}分钟` : ''}` : 
+                    `${durationMinutes}分钟`;
+            }
+            
+            // 设置类别图标
+            const categoryIcons = {
+                '学习': 'bi-journal-text',
+                '工作': 'bi-briefcase',
+                '个人': 'bi-person',
+                '健康': 'bi-heart',
+                '社交': 'bi-people'
+            };
+            
+            // 填充模态框内容
+            document.getElementById('taskDetailTitle').textContent = event.title;
+            document.getElementById('taskDetailDescription').textContent = task.description || '暂无描述';
+            document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + '优先级';
+            document.getElementById('taskDetailPriority').className = 'badge ' + getPriorityBadgeClass(task.priority);
+            document.getElementById('taskDetailCategory').textContent = task.category;
+            document.getElementById('taskDetailStatus').textContent = task.completed ? '已完成' : '待完成';
+            document.getElementById('taskDetailStatus').className = task.completed ? 'task-status status-completed' : 'task-status status-pending';
+            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('zh-CN');
+            document.getElementById('taskDetailTime').textContent = timeInfo;
+            document.getElementById('taskDetailType').textContent = getEventTypeText(task.type);
+            document.getElementById('taskDetailGroup').textContent = `${task.gid}.${task.rid}`;
+            document.getElementById('taskCategoryIcon').className = categoryIcons[task.category] || 'bi-tag';
+            document.getElementById('taskDetailCategoryFull').textContent = task.category;
+            
+            // 显示模态框
+            const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            modal.show();
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            document.getElementById('refresh-data').addEventListener('click', async function() {
+                await loadTaskData();
+            });
+            
+            document.getElementById('toggle-view').addEventListener('click', function() {
+                const currentView = calendar.view.type;
+                if (currentView === 'dayGridMonth') {
+                    calendar.changeView('timeGridWeek');
+                } else if (currentView === 'timeGridWeek') {
+                    calendar.changeView('timeGridDay');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            });
+            
+            document.getElementById('export-data').addEventListener('click', function() {
+                exportData();
+            });
+
+            // 添加主题选择模态框初始化
+            initializeThemeSelector();
+            
+            // 页面加载时应用保存的主题
+            const savedTheme = localStorage.getItem('theme') || 'blue';
+            changeTheme(savedTheme);
+        }
+        // 修改initializeThemeSelector函数
+        function initializeThemeSelector() {
+            const themeOptions = [
+                {
+                    id: 'blue',
+                    name: '蓝色主题',
+                    description: '专业、冷静、专注',
+                    primary: '#4361ee',
+                    secondary: '#3f37c9'
+                },
+                {
+                    id: 'green',
+                    name: '绿色主题',
+                    description: '自然、成长、平衡',
+                    primary: '#4cc9f0',
+                    secondary: '#4895ef'
+                },
+                {
+                    id: 'purple',
+                    name: '紫色主题',
+                    description: '创意、神秘、优雅',
+                    primary: '#7209b7',
+                    secondary: '#560bad'
+                },
+                {
+                    id: 'orange',
+                    name: '橙色主题',
+                    description: '活力、热情、温暖',
+                    primary: '#f8961e',
+                    secondary: '#f3722c'
+                },
+                {
+                    id: 'red',
+                    name: '红色主题',
+                    description: '紧急、重要、活力',
+                    primary: '#f72585',
+                    secondary: '#b5179e'
+                },
+                {
+                    id: 'teal',
+                    name: '青色主题',
+                    description: '清新、现代、平静',
+                    primary: '#06d6a0',
+                    secondary: '#04966b'
+                }
+            ];
+            
+            // 生成主题选项
+            const themeOptionsContainer = document.getElementById('theme-options');
+            themeOptionsContainer.innerHTML = themeOptions.map(theme => `
+                <div class="col-md-4">
+                    <div class="theme-option" data-theme="${theme.id}">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.primary}, ${theme.secondary});">
+                            ${theme.name}
+                        </div>
+                        <div class="theme-name">${theme.name}</div>
+                        <div class="theme-description">${theme.description}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 添加主题选择事件 - 即时应用主题但不关闭弹窗
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const selectedTheme = this.getAttribute('data-theme');
+                    
+                    // 移除所有active类
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // 添加active类到当前选项
+                    this.classList.add('active');
+                    
+                    // 立即应用主题
+                    changeTheme(selectedTheme);
+                    
+                    // 更新当前主题名称显示
+                    const themeName = themeOptions.find(t => t.id === selectedTheme).name;
+                    document.getElementById('current-theme-name').textContent = themeName;
+                    
+                    // 显示即时反馈
+                    showThemeAppliedFeedback(this);
+                });
+            });
+            
+            // 模态框显示时初始化选择状态
+            document.getElementById('themeSelectorModal').addEventListener('show.bs.modal', function() {
+                const currentTheme = localStorage.getItem('theme') || 'blue';
+                const currentOption = document.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
+                const themeName = themeOptions.find(t => t.id === currentTheme).name;
+                
+                document.getElementById('current-theme-name').textContent = themeName;
+                
+                if (currentOption) {
+                    // 移除所有active类
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // 添加active类到当前主题
+                    currentOption.classList.add('active');
+                }
+            });
+        }
+
+        // 添加主题应用反馈函数
+        function showThemeAppliedFeedback(element) {
+            // 添加应用反馈动画
+            element.classList.add('theme-applied');
+            
+            // 创建反馈元素
+            const feedback = document.createElement('div');
+            feedback.className = 'theme-feedback';
+            feedback.textContent = '✓ 已应用';
+            feedback.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 10;
+                pointer-events: none;
+            `;
+            
+            element.appendChild(feedback);
+            
+            // 移除反馈元素
+            setTimeout(() => {
+                feedback.remove();
+                element.classList.remove('theme-applied');
+            }, 1000);
+        }
+
+        // 修改changeTheme函数，添加更流畅的过渡
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            
+            // 添加主题切换过渡类
+            document.body.classList.add('theme-changing');
+            
+            // 根据选择的主题更新CSS变量
+            switch(theme) {
+                case 'green':
+                    root.style.setProperty('--primary-color', '#4cc9f0');
+                    root.style.setProperty('--secondary-color', '#4895ef');
+                    root.style.setProperty('--primary-color-rgb', '76, 201, 240');
+                    break;
+                case 'purple':
+                    root.style.setProperty('--primary-color', '#7209b7');
+                    root.style.setProperty('--secondary-color', '#560bad');
+                    root.style.setProperty('--primary-color-rgb', '114, 9, 183');
+                    break;
+                case 'orange':
+                    root.style.setProperty('--primary-color', '#f8961e');
+                    root.style.setProperty('--secondary-color', '#f3722c');
+                    root.style.setProperty('--primary-color-rgb', '248, 150, 30');
+                    break;
+                case 'red':
+                    root.style.setProperty('--primary-color', '#f72585');
+                    root.style.setProperty('--secondary-color', '#b5179e');
+                    root.style.setProperty('--primary-color-rgb', '247, 37, 133');
+                    break;
+                case 'teal':
+                    root.style.setProperty('--primary-color', '#06d6a0');
+                    root.style.setProperty('--secondary-color', '#04966b');
+                    root.style.setProperty('--primary-color-rgb', '6, 214, 160');
+                    break;
+                default: // blue
+                    root.style.setProperty('--primary-color', '#4361ee');
+                    root.style.setProperty('--secondary-color', '#3f37c9');
+                    root.style.setProperty('--primary-color-rgb', '67, 97, 238');
+            }
+            
+            // 保存主题选择到localStorage
+            localStorage.setItem('theme', theme);
+            
+            // 移除过渡类
+            setTimeout(() => {
+                document.body.classList.remove('theme-changing');
+            }, 500);
+            
+            // 显示主题切换提示（使用更轻量的提示）
+            showThemeToast(`已切换到${getThemeName(theme)}主题`);
+        }
+
+        // 添加轻量级主题切换提示
+        function showThemeToast(message) {
+            // 创建轻量级提示元素
+            const toast = document.createElement('div');
+            toast.className = 'theme-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--primary-color);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1060;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 自动移除提示
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 2000);
+        }
+        // 显示加载状态
+        function showLoadingState() {
+            document.getElementById('today-tasks').innerHTML = `
+                <div class="text-center p-4 text-muted">
+                    <div class="loading-spinner mb-2"></div>
+                    <div>加载任务中...</div>
+                </div>
+            `;
+            
+            document.getElementById('today-task-count').textContent = '加载中...';
+            document.getElementById('total-tasks').textContent = '-';
+            document.getElementById('completed-tasks').textContent = '-';
+            document.getElementById('high-priority-tasks').textContent = '-';
+            document.getElementById('completion-rate').textContent = '-';
+        }
+
+        // 显示Toast通知
+        function showToast(message, type) {
+            const toastElement = type === 'success' ? 
+                document.getElementById('successToast') : 
+                document.getElementById('errorToast');
+                
+            const messageElement = type === 'success' ?
+                document.getElementById('toastMessage') :
+                document.getElementById('errorToastMessage');
+                
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+    </script>
+</body>
+</html>
