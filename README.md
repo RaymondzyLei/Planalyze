@@ -139,6 +139,7 @@ todo
 
 - https://getbootstrap.com/ - 现代化的响应式前端框架
 - https://fullcalendar.io/ - 功能丰富的JavaScript日历库
+- https://github.com/nlohmann/json - JSON for Modern C++
 - 程序设计课程提供的学习机会和指导
 
 ## 📞 联系方式
