@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能日程规划器 - Planalyze</title>
+    <title>Smart Schedule Planner - Planalyze</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,12 +16,12 @@
     
     <style>
     :root {
-        /* 当前主题变量（默认蓝色） */
+        /* Current theme variables (default blue) */
         --primary-color: #4361ee;
         --secondary-color: #3f37c9;
         --primary-color-rgb: 67, 97, 238;
         
-        /* 其他颜色保持不变 */
+        /* Other colors remain unchanged */
         --success-color: #4cc9f0;
         --danger-color: #f72585;
         --warning-color: #f8961e;
@@ -29,7 +29,7 @@
         --dark-color: #212529;
     }
     
-    /* 添加背景图片样式 */
+    /* Add background image style */
     body {
         background-image: url('data/bg.jpg');
         background-size: cover;
@@ -76,7 +76,7 @@
         backdrop-filter: blur(15px);
     }
     
-    /* 全局主题切换过渡效果 */
+    /* Global theme transition effect */
     body.theme-changing * {
         transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
     }
@@ -85,7 +85,7 @@
         transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
     }
     
-    /* 主题提示动画 */
+    /* Theme prompt animation */
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -199,7 +199,7 @@
         font-weight: 500;
     }
     
-    /* 修改Deadline事件渲染样式 */
+    /* Modify Deadline event rendering style */
     .fc-event.deadline-event {
         background-color: rgba(247, 37, 133, 0.2) !important;
         border: 2px dashed #f72585 !important;
@@ -207,17 +207,17 @@
         font-weight: 600;
     }
     
-    /* 跨天事件样式 */
+    /* Multi-day event style */
     .fc-event.multi-day-event {
         border-left: 4px dashed var(--warning-color);
     }
     
-    /* 确保Deadline事件在日历中突出显示 */
+    /* Ensure Deadline events stand out in calendar */
     .fc-daygrid-event.deadline-event .fc-event-title {
         font-weight: 700;
     }
     
-    /* 在月视图中为Deadline事件添加特殊标记 */
+    /* Add special marker for Deadline events in month view */
     .fc-daygrid-event.deadline-event:before {
         content: "!";
         display: inline-block;
@@ -338,7 +338,7 @@
         font-size: 0.9rem;
     }
     
-    /* 任务详情模态框样式 - 优化版 */
+    /* Task detail modal style - optimized version */
     .task-detail-modal .modal-content {
         border-radius: 16px;
         border: none;
@@ -363,7 +363,7 @@
         background-color: #f8f9fa;
     }
     
-    /* 任务详情弹窗内标签样式优化 */
+    /* Optimize tag styles in task detail modal */
     .task-detail-modal .badge {
         padding: 0.6rem 1rem;
         font-size: 1rem;
@@ -377,14 +377,14 @@
         border-radius: 8px;
     }
     
-    /* 特别调整任务详情模态框内的优先级标签 */
+    /* Special adjustment for priority tags in task detail modal */
     .task-detail-modal .task-meta .badge {
         font-size: 1.05rem;
         padding: 0.7rem 1.2rem;
         margin: 0.2rem;
     }
     
-    /* 调整状态标签样式 */
+    /* Adjust status tag style */
     .task-detail-modal .task-status {
         padding: 0.7rem 1.2rem;
         font-size: 1rem;
@@ -396,7 +396,7 @@
         min-height: 32px;
     }
     
-    /* 重复事件标记样式 */
+    /* Recurring event marker style */
     .recurring-badge {
         background-color: rgba(76, 201, 240, 0.1);
         color: var(--success-color);
@@ -408,7 +408,7 @@
         font-weight: 600;
     }
     
-    /* 确保图标与文字对齐 */
+    /* Ensure icons align with text */
     .task-detail-modal .task-detail-value {
         align-items: center;
         font-size: 1.05rem;
@@ -525,7 +525,7 @@
         transform: rotate(90deg);
     }
     
-    /* 事件类型指示器 */
+    /* Event type indicator */
     .event-type-indicator {
         display: inline-flex;
         align-items: center;
@@ -554,7 +554,7 @@
         border: 1px solid var(--danger-color);
     }
     
-    /*主题选择弹窗部分*/
+    /* Theme selection modal section */
     .theme-option {
         cursor: pointer;
         transition: all 0.3s ease;
@@ -593,7 +593,7 @@
         font-size: 14px;
     }
 
-    /* 主题应用动画 */
+    /* Theme application animation */
     @keyframes themeApplied {
         0% { transform: scale(1); }
         50% { transform: scale(1.05); }
@@ -630,7 +630,7 @@
 </style>
 </head>
 <body>
-    <!-- 导航栏 -->
+    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
         <div class="container">
             <a class="navbar-brand" href="#">
@@ -643,17 +643,17 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link active" href="#">
-                            <i class="bi bi-house me-1"></i>首页
+                            <i class="bi bi-house me-1"></i>Home
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="export-pdf">
-                            <i class="bi bi-file-pdf me-1"></i>导出PDF
+                            <i class="bi bi-file-pdf me-1"></i>Export PDF
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" id="export-data">
-                            <i class="bi bi-download me-1"></i>导出数据
+                            <i class="bi bi-download me-1"></i>Export Data
                         </a>
                     </li>
                 </ul>
@@ -661,26 +661,26 @@
         </div>
     </nav>
 
-    <!-- 主内容区 -->
+    <!-- Main Content Area -->
     <div class="container my-4">
-        <!-- 欢迎横幅 -->
+        <!-- Welcome Banner -->
         <div class="row mb-4">
             <div class="col-12">
                 <div class="p-4 text-white rounded-3" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
-                    <h1 class="display-6 mb-2">欢迎使用 Planalyze</h1>
-                    <p class="mb-0">智能时间编织者 - 支持复杂重复事件的高效日程规划</p>
+                    <h1 class="display-6 mb-2">Welcome to Planalyze</h1>
+                    <p class="mb-0">Smart Time Weaver - Efficient schedule planning with complex recurring events</p>
                 </div>
             </div>
         </div>
         
         <div class="row">
-            <!-- 左侧：日历和任务列表 -->
+            <!-- Left Side: Calendar and Task List -->
             <div class="col-lg-10">
-                <!-- 日历区域 -->
+                <!-- Calendar Area -->
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-calendar-week me-2"></i>我的日历
+                            <i class="bi bi-calendar-week me-2"></i>My Calendar
                         </h5>
                     </div>
                     <div class="card-body p-0">
@@ -688,83 +688,83 @@
                     </div>
                 </div>
                 
-                <!-- 任务列表 -->
+                <!-- Task List -->
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-list-task me-2"></i>今日任务
+                            <i class="bi bi-list-task me-2"></i>Today's Tasks
                         </h5>
-                        <span class="badge bg-light text-dark" id="today-task-count">加载中...</span>
+                        <span class="badge bg-light text-dark" id="today-task-count">Loading...</span>
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush" id="today-tasks">
                             <div class="text-center p-4 text-muted">
                                 <div class="loading-spinner mb-2"></div>
-                                <div>加载任务中...</div>
+                                <div>Loading tasks...</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- 右侧：统计信息和快速操作 -->
+            <!-- Right Side: Statistics and Quick Actions -->
             <div class="col-lg-2">
-                <!-- 统计信息 -->
+                <!-- Statistics -->
                 <div class="card sidebar-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up me-2"></i>本周统计
+                            <i class="bi bi-graph-up me-2"></i>Weekly Statistics
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
                             <div class="col-6 mb-3">
                                 <div class="stats-number" id="total-tasks">-</div>
-                                <small class="text-muted">总任务数</small>
+                                <small class="text-muted">Total Tasks</small>
                             </div>
                             <div class="col-6 mb-3">
                                 <div class="stats-number" id="completed-tasks">-</div>
-                                <small class="text-muted">已完成</small>
+                                <small class="text-muted">Completed</small>
                             </div>
                             <div class="col-6">
                                 <div class="stats-number" id="high-priority-tasks">-</div>
-                                <small class="text-muted">高优先级</small>
+                                <small class="text-muted">High Priority</small>
                             </div>
                             <div class="col-6">
                                 <div class="stats-number" id="completion-rate">-</div>
-                                <small class="text-muted">完成率</small>
+                                <small class="text-muted">Completion Rate</small>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 快速操作 -->
+                <!-- Quick Actions -->
                 <div class="card sidebar-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-lightning me-2"></i>快速操作
+                            <i class="bi bi-lightning me-2"></i>Quick Actions
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
                             <button class="btn btn-outline-primary" id="refresh-data">
-                                <i class="bi bi-arrow-repeat me-2"></i>刷新数据
+                                <i class="bi bi-arrow-repeat me-2"></i>Refresh Data
                             </button>
                             <button class="btn btn-outline-primary" id="toggle-view">
-                                <i class="bi bi-calendar-week me-2"></i>切换视图
+                                <i class="bi bi-calendar-week me-2"></i>Toggle View
                             </button>
                             <button class="btn btn-outline-primary" id="theme-selector-btn" data-bs-toggle="modal" data-bs-target="#themeSelectorModal">
-                                <i class="bi bi-palette me-2"></i>选择主题
+                                <i class="bi bi-palette me-2"></i>Select Theme
                             </button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 功能特性 -->
+                <!-- Features -->
                 <div class="card sidebar-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-stars me-2"></i>功能特性
+                            <i class="bi bi-stars me-2"></i>Features
                         </h5>
                     </div>
                     <div class="card-body">
@@ -773,8 +773,8 @@
                                 <i class="bi bi-calendar-check"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">复杂重复事件</h6>
-                                <small class="text-muted">支持每日/每周/每月/每年重复</small>
+                                <h6 class="mb-0">Complex Recurring Events</h6>
+                                <small class="text-muted">Supports daily/weekly/monthly/yearly repetition</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -782,8 +782,8 @@
                                 <i class="bi bi-calendar-x"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">排除日期</h6>
-                                <small class="text-muted">支持排除特定日期区间</small>
+                                <h6 class="mb-0">Excluded Dates</h6>
+                                <small class="text-muted">Supports excluding specific date ranges</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -791,8 +791,8 @@
                                 <i class="bi bi-share"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">数据导出</h6>
-                                <small class="text-muted">支持导出数据</small>
+                                <h6 class="mb-0">Data Export</h6>
+                                <small class="text-muted">Supports exporting data</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -800,8 +800,8 @@
                                 <i class="bi bi-eyedropper"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">切换主题</h6>
-                                <small class="text-muted">支持六种主题</small>
+                                <h6 class="mb-0">Theme Switching</h6>
+                                <small class="text-muted">Supports six themes</small>
                             </div>
                         </div>
                     </div>
@@ -810,52 +810,52 @@
         </div>
     </div>
 
-    <!-- 任务详情模态框 -->
+    <!-- Task Detail Modal -->
     <div class="modal fade task-detail-modal" id="taskDetailModal" tabindex="-1" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="task-detail-header w-100">
                         <div>
-                            <h5 class="task-title mb-1" id="taskDetailTitle">任务标题</h5>
+                            <h5 class="task-title mb-1" id="taskDetailTitle">Task Title</h5>
                             <div class="task-meta">
-                                <span class="badge" id="taskDetailPriority">高优先级</span>
-                                <span class="badge bg-light text-dark" id="taskDetailCategory">学习</span>
-                                <span class="task-status" id="taskDetailStatus">待完成</span>
-                                <span class="recurring-badge" id="taskDetailRecurring" style="display: none;">重复</span>
+                                <span class="badge" id="taskDetailPriority">High Priority</span>
+                                <span class="badge bg-light text-dark" id="taskDetailCategory">Study</span>
+                                <span class="task-status" id="taskDetailStatus">Pending</span>
+                                <span class="recurring-badge" id="taskDetailRecurring" style="display: none;">Recurring</span>
                             </div>
                         </div>
-                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="关闭">
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                 </div>
                 <div class="modal-body">
                     <div class="task-description" id="taskDetailDescription">
-                        任务描述将显示在这里...
+                        Task description will be displayed here...
                     </div>
                     
                     <div class="task-detail-grid">
                         <div class="task-detail-item">
-                            <span class="task-detail-label"><i class="bi bi-calendar me-1"></i>日期</span>
+                            <span class="task-detail-label"><i class="bi bi-calendar me-1"></i>Date</span>
                             <span class="task-detail-value" id="taskDetailDate">-</span>
                         </div>
                         <div class="task-detail-item">
-                            <span class="task-detail-label"><i class="bi bi-clock me-1"></i>时间</span>
+                            <span class="task-detail-label"><i class="bi bi-clock me-1"></i>Time</span>
                             <span class="task-detail-value" id="taskDetailTime">-</span>
                         </div>
                         <div class="task-detail-item">
-                            <span class="task-detail-label"><i class="bi bi-tag me-1"></i>事件类型</span>
+                            <span class="task-detail-label"><i class="bi bi-tag me-1"></i>Event Type</span>
                             <span class="task-detail-value" id="taskDetailType">-</span>
                         </div>
                         <div class="task-detail-item">
-                            <span class="task-detail-label"><i class="bi bi-arrow-repeat me-1"></i>重复类型</span>
+                            <span class="task-detail-label"><i class="bi bi-arrow-repeat me-1"></i>Recurrence Type</span>
                             <span class="task-detail-value" id="taskDetailRepetition">-</span>
                         </div>
                     </div>
                     
                     <div class="task-detail-item">
-                        <span class="task-detail-label"><i class="bi bi-tags me-1"></i>任务类别</span>
+                        <span class="task-detail-label"><i class="bi bi-tags me-1"></i>Task Category</span>
                         <span class="task-detail-value">
                             <span class="task-detail-icon">
                                 <i class="bi" id="taskCategoryIcon"></i>
@@ -864,66 +864,66 @@
                         </span>
                     </div>
                     
-                    <!-- 重复事件详情 -->
+                    <!-- Recurring Event Details -->
                     <div id="recurrenceDetails" style="display: none;">
                         <hr>
-                        <h6>重复事件详情</h6>
+                        <h6>Recurring Event Details</h6>
                         <div class="task-detail-grid">
                             <div class="task-detail-item">
-                                <span class="task-detail-label"><i class="bi bi-calendar-range me-1"></i>开始日期</span>
+                                <span class="task-detail-label"><i class="bi bi-calendar-range me-1"></i>Start Date</span>
                                 <span class="task-detail-value" id="taskDetailStartDate">-</span>
                             </div>
                             <div class="task-detail-item">
-                                <span class="task-detail-label"><i class="bi bi-calendar-x me-1"></i>结束日期</span>
+                                <span class="task-detail-label"><i class="bi bi-calendar-x me-1"></i>End Date</span>
                                 <span class="task-detail-value" id="taskDetailEndDate">-</span>
                             </div>
                             <div class="task-detail-item">
-                                <span class="task-detail-label"><i class="bi bi-calendar-event me-1"></i>排除日期</span>
+                                <span class="task-detail-label"><i class="bi bi-calendar-event me-1"></i>Excluded Dates</span>
                                 <span class="task-detail-value" id="taskDetailBanned">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 主题选择模态框 -->
+    <!-- Theme Selection Modal -->
     <div class="modal fade" id="themeSelectorModal" tabindex="-1" aria-labelledby="themeSelectorModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="themeSelectorModalLabel">
-                        <i class="bi bi-palette me-2"></i>选择主题颜色（选择后立即生效）
+                        <i class="bi bi-palette me-2"></i>Select Theme Color (Applies Immediately)
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="container">
                         <div class="row g-3" id="theme-options">
-                            <!-- 主题选项将通过JavaScript动态生成 -->
+                            <!-- Theme options will be generated dynamically via JavaScript -->
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <div class="me-auto">
-                        <small class="text-muted">当前主题：<span id="current-theme-name">蓝色主题</span></small>
+                        <small class="text-muted">Current theme: <span id="current-theme-name">Blue Theme</span></small>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- 通知Toast -->
+    <!-- Notification Toast -->
     <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
         <div class="d-flex">
             <div class="toast-body">
                 <i class="bi bi-check-circle me-2"></i>
-                <span id="toastMessage">操作成功！</span>
+                <span id="toastMessage">Operation successful!</span>
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
@@ -933,22 +933,22 @@
         <div class="d-flex">
             <div class="toast-body">
                 <i class="bi bi-exclamation-triangle me-2"></i>
-                <span id="errorToastMessage">操作失败！</span>
+                <span id="errorToastMessage">Operation failed!</span>
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     </div>
 
-    <!-- 页脚 -->
+    <!-- Footer -->
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Planalyze - 智能日程规划器</h5>
-                    <p>支持复杂重复事件和排除日期的日程管理工具</p>
+                    <h5>Planalyze - Smart Schedule Planner</h5>
+                    <p>A schedule management tool supporting complex recurring events and excluded dates</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p>Copyright &copy; 2025 Planalyze. 基于 <a href="LICENSE">MIT 许可证</a>.</p>
+                    <p>Copyright &copy; 2025 Planalyze. Based on <a href="LICENSE">MIT License</a>.</p>
                 </div>
             </div>
         </div>
@@ -962,51 +962,51 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/zh-cn.js"></script>
     
     <script>
-        // 全局变量
+        // Global variables
         let tasks = [];
         let calendar;
 
-        // 初始化应用
+        // Initialize application
         document.addEventListener('DOMContentLoaded', async function() {
-            // 初始化日历
+            // Initialize calendar
             initializeCalendar();
             
-            // 加载任务数据
+            // Load task data
             await loadTaskData();
             
-            // 设置事件监听器
+            // Set up event listeners
             setupEventListeners();
         });
 
-        // 初始化FullCalendar
+        // Initialize FullCalendar
         function initializeCalendar() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                locale: 'zh-cn',
+                locale: 'en',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek,timeGridDay'
                 },
                 buttonText: {
-                    today: '今天',
-                    month: '月',
-                    week: '周',
-                    day: '日'
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day'
                 },
                 events: function(fetchInfo, successCallback, failureCallback) {
-                    // 将任务转换为FullCalendar事件格式
+                    // Convert tasks to FullCalendar event format
                     const events = tasks.map(task => {
                         let start, end;
                         
-                        // 根据事件类型设置开始和结束时间
+                        // Set start and end times based on event type
                         if (task.type === 'schedule') {
                             start = `${task.date}T${task.startTime}`;
                             
-                            // 处理跨天事件
+                            // Handle multi-day events
                             if (task.endTime && task.endTime < task.startTime) {
-                                // 结束时间比开始时间早，表示跨天事件
+                                // End time is earlier than start time, indicating a multi-day event
                                 const nextDay = new Date(task.date);
                                 nextDay.setDate(nextDay.getDate() + 1);
                                 const nextDayStr = nextDay.toISOString().split('T')[0];
@@ -1015,12 +1015,12 @@
                                 end = `${task.date}T${task.endTime || task.startTime}`;
                             }
                         } else {
-                            // point和deadline类型使用time字段
+                            // point and deadline types use the time field
                             start = `${task.date}T${task.time}`;
-                            end = start; // 单点事件，结束时间与开始时间相同
+                            end = start; // Single point event, end time same as start time
                         }
                         
-                        // 为Deadline事件添加特殊样式类
+                        // Add special style class for Deadline events
                         let className = '';
                         if (task.type === 'deadline') {
                             className = 'deadline-event';
@@ -1028,7 +1028,7 @@
                             className = 'multi-day-event';
                         }
                         
-                        // 如果是重复事件，添加重复标记
+                        // Add recurring marker if it's a recurring event
                         if (task.repetition && task.repetition !== 'Once') {
                             className += ' recurring-event';
                         }

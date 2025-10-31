@@ -38,6 +38,7 @@ Planalyze 是一个功能强大的日程管理与任务规划系统，作为程�
 ### 环境要求
 - C++编译器 (GCC 9.0+ 或 Clang 10.0+)
 - 现代Web浏览器 (Edge 90+, Chrome 90+, Firefox 88+, Safari 14+)
+- python 3或vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer),用于构建服务端环境
 - 没有其他要求了，很方便不是吗
 
 ### 安装步骤
@@ -47,18 +48,19 @@ Planalyze 是一个功能强大的日程管理与任务规划系统，作为程�
 git clone https://github.com/your-username/planalyze.git
 cd planalyze
 ```
+或者下载源代码
 
 2. **编译后端程序**
-```bash
-todo
-```
 
-3. **启动前端服务**
-```bash
-todo
-```
+编译planalyze.cpp得到planalyze.exe
 
-4. **访问应用**
+1. **启动前端服务**
+```bash
+python -m http.server 8000
+```
+或者使用vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+
+1. **访问应用**
 打开浏览器访问 `http://localhost:8000`
 
 ## 📁 项目结构
@@ -67,7 +69,6 @@ todo
 planalyze/
 ├── docs/                  # 文档
 └── README.md             # 项目说明
-todo
 ```
 
 ## 💡 使用说明
@@ -89,35 +90,26 @@ todo
 ### 命令行接口示例
 
 ```bash
-# 添加任务
-todo
+# 查看帮助
+./planalyze.exe
 
-# 查看今日任务
-todo
+# 添加任务
+./planalyze.exe -a
+
+# 查看任务
+./planalyze.exe -l
 
 # 删除任务
-todo
-
-# 标记完成
-todo
+./planalyze.exe -r
 ```
 
 ## 🔧 开发指南
 
 ### 前端开发
-前端基于Bootstrap和FullCalendar构建，支持自定义主题和插件扩展。
-
-```javascript
-// 初始化日历
-todo
-```
+前端基于Bootstrap和FullCalendar构建，支持自定义主题。
 
 ### 后端开发
-todo
-
-```cpp
-todo
-```
+使用[JSON for Modern C++](https://github.com/nlohmann/json)将用户通过命令行输入的日程数据存放在data.json中
 
 ## 🤝 贡献指南
 
