@@ -15,16 +15,52 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
     
     <style>
-        :root {
+                :root {
+            /* 当前主题变量（默认蓝色） */
             --primary-color: #4361ee;
             --secondary-color: #3f37c9;
+            --primary-color-rgb: 67, 97, 238;
+            
+            /* 其他颜色保持不变 */
             --success-color: #4cc9f0;
             --danger-color: #f72585;
             --warning-color: #f8961e;
             --light-color: #f8f9fa;
             --dark-color: #212529;
         }
-        
+        /* 全局主题切换过渡效果 */
+        body.theme-changing * {
+            transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+        }
+
+        /* 特定元素的过渡效果 */
+        .navbar, .card, .btn, .fc-toolbar, .fc-event {
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+        }
+
+        /* 主题提示动画 */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -311,6 +347,79 @@
             border: none;
             padding: 1rem 1.5rem 1.5rem;
             background-color: #f8f9fa;
+        }
+        /*主题选择弹窗部分*/
+        /* 主题选择器样式增强 */
+        .theme-option {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-option.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        }
+
+        .theme-option.active::after {
+            content: "✓";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* 主题应用动画 */
+        @keyframes themeApplied {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .theme-option.theme-applied {
+            animation: themeApplied 0.5s ease;
+        }
+
+        .theme-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .theme-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .theme-description {
+            font-size: 0.85rem;
+            color: #6c757d;
         }
         /* 修改任务详情弹窗标签高度 */
         .task-detail-modal .badge {
@@ -600,6 +709,9 @@
                             <button class="btn btn-outline-primary" id="toggle-view">
                                 <i class="bi bi-calendar-week me-2"></i>切换视图
                             </button>
+                            <button class="btn btn-outline-primary" id="theme-selector-btn" data-bs-toggle="modal" data-bs-target="#themeSelectorModal">
+                                <i class="bi bi-palette me-2"></i>选择主题
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -630,13 +742,22 @@
                                 <small class="text-muted">支持分组和重复</small>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mb-3">
                             <div class="feature-icon">
                                 <i class="bi bi-share"></i>
                             </div>
                             <div>
                                 <h6 class="mb-0">数据导出</h6>
-                                <small class="text-muted">可将数据导出</small>
+                                <small class="text-muted">支持导出数据</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-eyedropper"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">切换主题</h6>
+                                <small class="text-muted">支持六种主题</small>
                             </div>
                         </div>
                     </div>
@@ -704,7 +825,32 @@
             </div>
         </div>
     </div>
-
+    <!-- 主题选择模态框 -->
+    <div class="modal fade" id="themeSelectorModal" tabindex="-1" aria-labelledby="themeSelectorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themeSelectorModalLabel">
+                        <i class="bi bi-palette me-2"></i>选择主题颜色（选择后立即生效）
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row g-3" id="theme-options">
+                            <!-- 主题选项将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <small class="text-muted">当前主题：<span id="current-theme-name">蓝色主题</span></small>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- 通知Toast -->
     <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
         <div class="d-flex">
@@ -1227,8 +1373,238 @@
             document.getElementById('export-data').addEventListener('click', function() {
                 exportData();
             });
+
+            // 添加主题选择模态框初始化
+            initializeThemeSelector();
+            
+            // 页面加载时应用保存的主题
+            const savedTheme = localStorage.getItem('theme') || 'blue';
+            changeTheme(savedTheme);
+        }
+        // 修改initializeThemeSelector函数
+        function initializeThemeSelector() {
+            const themeOptions = [
+                {
+                    id: 'blue',
+                    name: '蓝色主题',
+                    description: '专业、冷静、专注',
+                    primary: '#4361ee',
+                    secondary: '#3f37c9'
+                },
+                {
+                    id: 'green',
+                    name: '绿色主题',
+                    description: '自然、成长、平衡',
+                    primary: '#4cc9f0',
+                    secondary: '#4895ef'
+                },
+                {
+                    id: 'purple',
+                    name: '紫色主题',
+                    description: '创意、神秘、优雅',
+                    primary: '#7209b7',
+                    secondary: '#560bad'
+                },
+                {
+                    id: 'orange',
+                    name: '橙色主题',
+                    description: '活力、热情、温暖',
+                    primary: '#f8961e',
+                    secondary: '#f3722c'
+                },
+                {
+                    id: 'red',
+                    name: '红色主题',
+                    description: '紧急、重要、活力',
+                    primary: '#f72585',
+                    secondary: '#b5179e'
+                },
+                {
+                    id: 'teal',
+                    name: '青色主题',
+                    description: '清新、现代、平静',
+                    primary: '#06d6a0',
+                    secondary: '#04966b'
+                }
+            ];
+            
+            // 生成主题选项
+            const themeOptionsContainer = document.getElementById('theme-options');
+            themeOptionsContainer.innerHTML = themeOptions.map(theme => `
+                <div class="col-md-4">
+                    <div class="theme-option" data-theme="${theme.id}">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.primary}, ${theme.secondary});">
+                            ${theme.name}
+                        </div>
+                        <div class="theme-name">${theme.name}</div>
+                        <div class="theme-description">${theme.description}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 添加主题选择事件 - 即时应用主题但不关闭弹窗
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const selectedTheme = this.getAttribute('data-theme');
+                    
+                    // 移除所有active类
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // 添加active类到当前选项
+                    this.classList.add('active');
+                    
+                    // 立即应用主题
+                    changeTheme(selectedTheme);
+                    
+                    // 更新当前主题名称显示
+                    const themeName = themeOptions.find(t => t.id === selectedTheme).name;
+                    document.getElementById('current-theme-name').textContent = themeName;
+                    
+                    // 显示即时反馈
+                    showThemeAppliedFeedback(this);
+                });
+            });
+            
+            // 模态框显示时初始化选择状态
+            document.getElementById('themeSelectorModal').addEventListener('show.bs.modal', function() {
+                const currentTheme = localStorage.getItem('theme') || 'blue';
+                const currentOption = document.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
+                const themeName = themeOptions.find(t => t.id === currentTheme).name;
+                
+                document.getElementById('current-theme-name').textContent = themeName;
+                
+                if (currentOption) {
+                    // 移除所有active类
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // 添加active类到当前主题
+                    currentOption.classList.add('active');
+                }
+            });
         }
 
+        // 添加主题应用反馈函数
+        function showThemeAppliedFeedback(element) {
+            // 添加应用反馈动画
+            element.classList.add('theme-applied');
+            
+            // 创建反馈元素
+            const feedback = document.createElement('div');
+            feedback.className = 'theme-feedback';
+            feedback.textContent = '✓ 已应用';
+            feedback.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 10;
+                pointer-events: none;
+            `;
+            
+            element.appendChild(feedback);
+            
+            // 移除反馈元素
+            setTimeout(() => {
+                feedback.remove();
+                element.classList.remove('theme-applied');
+            }, 1000);
+        }
+
+        // 修改changeTheme函数，添加更流畅的过渡
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            
+            // 添加主题切换过渡类
+            document.body.classList.add('theme-changing');
+            
+            // 根据选择的主题更新CSS变量
+            switch(theme) {
+                case 'green':
+                    root.style.setProperty('--primary-color', '#4cc9f0');
+                    root.style.setProperty('--secondary-color', '#4895ef');
+                    root.style.setProperty('--primary-color-rgb', '76, 201, 240');
+                    break;
+                case 'purple':
+                    root.style.setProperty('--primary-color', '#7209b7');
+                    root.style.setProperty('--secondary-color', '#560bad');
+                    root.style.setProperty('--primary-color-rgb', '114, 9, 183');
+                    break;
+                case 'orange':
+                    root.style.setProperty('--primary-color', '#f8961e');
+                    root.style.setProperty('--secondary-color', '#f3722c');
+                    root.style.setProperty('--primary-color-rgb', '248, 150, 30');
+                    break;
+                case 'red':
+                    root.style.setProperty('--primary-color', '#f72585');
+                    root.style.setProperty('--secondary-color', '#b5179e');
+                    root.style.setProperty('--primary-color-rgb', '247, 37, 133');
+                    break;
+                case 'teal':
+                    root.style.setProperty('--primary-color', '#06d6a0');
+                    root.style.setProperty('--secondary-color', '#04966b');
+                    root.style.setProperty('--primary-color-rgb', '6, 214, 160');
+                    break;
+                default: // blue
+                    root.style.setProperty('--primary-color', '#4361ee');
+                    root.style.setProperty('--secondary-color', '#3f37c9');
+                    root.style.setProperty('--primary-color-rgb', '67, 97, 238');
+            }
+            
+            // 保存主题选择到localStorage
+            localStorage.setItem('theme', theme);
+            
+            // 移除过渡类
+            setTimeout(() => {
+                document.body.classList.remove('theme-changing');
+            }, 500);
+            
+            // 显示主题切换提示（使用更轻量的提示）
+            showThemeToast(`已切换到${getThemeName(theme)}主题`);
+        }
+
+        // 添加轻量级主题切换提示
+        function showThemeToast(message) {
+            // 创建轻量级提示元素
+            const toast = document.createElement('div');
+            toast.className = 'theme-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--primary-color);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1060;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 自动移除提示
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 2000);
+        }
         // 显示加载状态
         function showLoadingState() {
             document.getElementById('today-tasks').innerHTML = `
