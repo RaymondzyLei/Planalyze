@@ -5,16 +5,10 @@
 #include <algorithm>
 #include <bitset>
 #include <set>
+#include <windows.h>
 #include "json.hpp"
 
 using json = nlohmann::json;
-
-enum Type {
-    SCHEDULE, POINT, DEADLINE
-};
-enum Priority {
-    LOW, MEDIUM, HIGH
-};
 
 bool is_leap_year(int year) {
     if (year % 400 == 0) return 1;
@@ -191,6 +185,7 @@ bool write_to_file(const std::string& filename, const std::string& content) {
 }
 
 void _help_all() {
+    std::cout << "Start your journy with Planalyze right now!" << std::endl;
     std::cout << "Usage: " << std::endl;
     std::cout << "  ./planalyze.exe [--help|-h] (<Command>)     show help for a command or all commands" << std::endl;
     std::cout << "  ./planalyze.exe [--add|-a] ...              add a new event" << std::endl;
@@ -358,6 +353,7 @@ void add(int argc, char* argv[]) {
                 if (argv0 == "schedule") {
                     new_event["start_time"] = read_time("Start Time: ").dump();
                     new_event["duration"] = read_time("Duration: ").dump();
+                    new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
                 } else {
                     new_event["time"] = read_time("Time: ").dump();
                 }
@@ -397,6 +393,7 @@ void add(int argc, char* argv[]) {
                     if (argv0 == "schedule") {
                         tmp["start_time"] = read_time("Start Time(" + to_string(n) + "): ").dump();
                         tmp["duration"] = read_duration("Duration(" + to_string(n) + "): ").dump();
+                        tmp["end_time"] = (Time::parse(tmp["start_time"]) + Duration::parse(tmp["duration"])).dump();
                     } else {
                         tmp["time"] = read_time("Time(" + to_string(n) + "): ").dump();
                     }
@@ -418,6 +415,7 @@ void add(int argc, char* argv[]) {
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
+                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
             } else {
                 new_event["time"] = read_time("Time: ").dump();
             }
@@ -440,6 +438,7 @@ void add(int argc, char* argv[]) {
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start Time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
+                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
             } else {
                 new_event["time"] = read_time("Time: ").dump();
             }
@@ -476,6 +475,7 @@ void add(int argc, char* argv[]) {
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start Time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
+                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
             } else {
                 new_event["time"] = read_time("Time: ").dump();
             }
@@ -512,6 +512,7 @@ void add(int argc, char* argv[]) {
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start Time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
+                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
             } else {
                 new_event["time"] = read_time("Time: ").dump();
             }
@@ -548,6 +549,7 @@ void add(int argc, char* argv[]) {
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start Time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
+                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
             } else {
                 new_event["time"] = read_time("Time: ").dump();
             }
