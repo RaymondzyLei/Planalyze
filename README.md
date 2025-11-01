@@ -51,20 +51,20 @@ Planalyze is a powerful schedule management and task planning system developed a
 git clone https://github.com/RaymondzyLei/Planalyze.git
 cd Planalyze
 ```
-Or download the source code directly
+   Or download the source code directly
 
 2. **Compile Backend Program**
 
-Compile planalyze.cpp to get planalyze.exe
+   Compile planalyze.cpp to get planalyze.exe
 
 3. **Start Frontend Server**
 ```bash
 python -m http.server 8000
 ```
-Or use VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+   Or use VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
 4. **Access Application**
-Open browser and visit `http://localhost:8000/index-en.html` if using python
+   Open browser and visit `http://localhost:8000/index-en.html` if using python
 
 ## 📁📁 Project Structure
 
