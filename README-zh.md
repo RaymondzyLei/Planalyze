@@ -46,8 +46,8 @@ Planalyze 是一个功能强大的日程管理与任务规划系统，作为程�
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/your-username/planalyze.git
-cd planalyze
+git clone https://github.com/RaymondzyLei/Planalyze.git
+cd Planalyze
 ```
 或者下载源代码
 
@@ -55,14 +55,14 @@ cd planalyze
 
 编译planalyze.cpp得到planalyze.exe
 
-1. **启动前端服务**
+3. **启动前端服务**
 ```bash
 python -m http.server 8000
 ```
 或者使用vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
-1. **访问应用**
-打开浏览器访问 `http://localhost:8000`
+4. **访问应用**
+如果你是用的是python，打开浏览器访问 `http://localhost:8000`
 
 ## 📁 项目结构
 

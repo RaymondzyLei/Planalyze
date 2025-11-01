@@ -48,8 +48,8 @@ Planalyze is a powerful schedule management and task planning system developed a
 
 1. **Clone the Project**
 ```bash
-git clone https://github.com/your-username/planalyze.git
-cd planalyze
+git clone https://github.com/RaymondzyLei/Planalyze.git
+cd Planalyze
 ```
 Or download the source code directly
 
@@ -64,7 +64,7 @@ python -m http.server 8000
 Or use VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
 4. **Access Application**
-Open browser and visit `http://localhost:8000/index-en.html`
+Open browser and visit `http://localhost:8000/index-en.html` if using python
 
 ## 📁📁 Project Structure
 
