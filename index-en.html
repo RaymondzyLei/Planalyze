@@ -29,7 +29,7 @@
         --dark-color: #212529;
     }
     
-    /* Add background image style */
+    /* Background image styles */
     body {
         background-image: url('data/bg.jpg');
         background-size: cover;
@@ -85,7 +85,7 @@
         transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
     }
     
-    /* Theme prompt animation */
+    /* Theme hint animation */
     @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
@@ -121,6 +121,12 @@
         border-radius: 8px;
     }
     
+    .task-id {
+        font-family: monospace;
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+
     .task-item:hover {
         background-color: rgba(67, 97, 238, 0.05);
         transform: translateX(5px);
@@ -363,7 +369,7 @@
         background-color: #f8f9fa;
     }
     
-    /* Optimize tag styles in task detail modal */
+    /* Task detail popup label style optimization */
     .task-detail-modal .badge {
         padding: 0.6rem 1rem;
         font-size: 1rem;
@@ -377,14 +383,14 @@
         border-radius: 8px;
     }
     
-    /* Special adjustment for priority tags in task detail modal */
+    /* Special adjustment for priority labels in task detail modal */
     .task-detail-modal .task-meta .badge {
         font-size: 1.05rem;
         padding: 0.7rem 1.2rem;
         margin: 0.2rem;
     }
     
-    /* Adjust status tag style */
+    /* Status label style adjustment */
     .task-detail-modal .task-status {
         padding: 0.7rem 1.2rem;
         font-size: 1rem;
@@ -408,7 +414,7 @@
         font-weight: 600;
     }
     
-    /* Ensure icons align with text */
+    /* Ensure icon and text alignment */
     .task-detail-modal .task-detail-value {
         align-items: center;
         font-size: 1.05rem;
@@ -554,7 +560,7 @@
         border: 1px solid var(--danger-color);
     }
     
-    /* Theme selection modal section */
+    /*Theme selection popup section*/
     .theme-option {
         cursor: pointer;
         transition: all 0.3s ease;
@@ -674,8 +680,8 @@
         </div>
         
         <div class="row">
-            <!-- Left Side: Calendar and Task List -->
-            <div class="col-lg-9">
+            <!-- Left: Calendar and Task List -->
+            <div class="col-lg-10">
                 <!-- Calendar Area -->
                 <div class="card">
                     <div class="card-header">
@@ -707,13 +713,13 @@
                 </div>
             </div>
             
-            <!-- Right Side: Statistics and Quick Actions -->
-            <div class="col-lg-3">
+            <!-- Right: Statistics and Quick Actions -->
+            <div class="col-lg-2">
                 <!-- Statistics -->
                 <div class="card sidebar-card">
                     <div class="card-header">
                         <h5 class="card-title mb-0">
-                            <i class="bi bi-graph-up me-2"></i>Weekly Statistics
+                            <i class="bi bi-graph-up me-2"></i>This Week's Stats
                         </h5>
                     </div>
                     <div class="card-body">
@@ -774,7 +780,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">Recurring Events</h6>
-                                <small class="text-muted">Supports repetition</small>
+                                <small class="text-muted">Four repetition types</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -782,8 +788,8 @@
                                 <i class="bi bi-calendar-x"></i>
                             </div>
                             <div>
-                                <h6 class="mb-0">Excluded Dates</h6>
-                                <small class="text-muted">Supports excluding date ranges</small>
+                                <h6 class="mb-0">Exclude Dates</h6>
+                                <small class="text-muted">Date exclusion support</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -792,7 +798,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">Data Export</h6>
-                                <small class="text-muted">Supports exporting data</small>
+                                <small class="text-muted">Export data support</small>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
@@ -801,7 +807,7 @@
                             </div>
                             <div>
                                 <h6 class="mb-0">Theme Switching</h6>
-                                <small class="text-muted">Supports six themes</small>
+                                <small class="text-muted">Six themes available</small>
                             </div>
                         </div>
                     </div>
@@ -818,6 +824,7 @@
                     <div class="task-detail-header w-100">
                         <div>
                             <h5 class="task-title mb-1" id="taskDetailTitle">Task Title</h5>
+                            <div class="task-id text-muted small mb-2" id="taskDetailId">ID: -</div>
                             <div class="task-meta">
                                 <span class="badge" id="taskDetailPriority">High Priority</span>
                                 <span class="badge bg-light text-dark" id="taskDetailCategory">Study</span>
@@ -832,7 +839,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="task-description" id="taskDetailDescription">
-                        Task description will be displayed here...
+                        Task description will appear here...
                     </div>
                     
                     <div class="task-detail-grid">
@@ -849,7 +856,7 @@
                             <span class="task-detail-value" id="taskDetailType">-</span>
                         </div>
                         <div class="task-detail-item">
-                            <span class="task-detail-label"><i class="bi bi-arrow-repeat me-1"></i>Recurrence Type</span>
+                            <span class="task-detail-label"><i class="bi bi-arrow-repeat me-1"></i>Repetition Type</span>
                             <span class="task-detail-value" id="taskDetailRepetition">-</span>
                         </div>
                     </div>
@@ -897,20 +904,20 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="themeSelectorModalLabel">
-                        <i class="bi bi-palette me-2"></i>Select Theme Color (Applies Immediately)
+                        <i class="bi bi-palette me-2"></i>Select Theme Color (Applied immediately)
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="container">
                         <div class="row g-3" id="theme-options">
-                            <!-- Theme options will be generated dynamically via JavaScript -->
+                            <!-- Theme options will be dynamically generated via JavaScript -->
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <div class="me-auto">
-                        <small class="text-muted">Current theme: <span id="current-theme-name">Blue Theme</span></small>
+                        <small class="text-muted">Current Theme: <span id="current-theme-name">Blue Theme</span></small>
                     </div>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
@@ -945,7 +952,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h5>Planalyze - Smart Schedule Planner</h5>
-                    <p>A schedule management tool supporting complex recurring events and excluded dates</p>
+                    <p>Schedule management tool with complex recurring events and date exclusion support</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p>Copyright &copy; 2025 Planalyze. Based on <a href="LICENSE">MIT License</a>.</p>
@@ -959,7 +966,7 @@
     
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/zh-cn.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/en-gb.js"></script>
     
     <script>
         // Global variables
@@ -983,7 +990,7 @@
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                locale: 'en',
+                locale: 'en-gb',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -1006,7 +1013,7 @@
                             
                             // Handle multi-day events
                             if (task.endTime && task.endTime < task.startTime) {
-                                // End time is earlier than start time, indicating a multi-day event
+                                // End time is earlier than start time, indicating multi-day event
                                 const nextDay = new Date(task.date);
                                 nextDay.setDate(nextDay.getDate() + 1);
                                 const nextDayStr = nextDay.toISOString().split('T')[0];
@@ -1015,9 +1022,9 @@
                                 end = `${task.date}T${task.endTime || task.startTime}`;
                             }
                         } else {
-                            // point and deadline types use the time field
+                            // point and deadline types use time field
                             start = `${task.date}T${task.time}`;
-                            end = start; // Single point event, end time same as start time
+                            end = start; // Single point event, end time same as start
                         }
                         
                         // Add special style class for Deadline events
@@ -1028,11 +1035,12 @@
                             className = 'multi-day-event';
                         }
                         
-                        // Add recurring marker if it's a recurring event
+                        // Add recurring marker for recurring events
                         if (task.repetition && task.repetition !== 'Once') {
                             className += ' recurring-event';
                         }
-                                                return {
+                        
+                        return {
                             id: task.id,
                             title: task.title,
                             start: start,
@@ -1074,16 +1082,16 @@
             try {
                 showLoadingState();
                 
-                // Using new JSON format
+                // Use new JSON format
                 //const response = await fetch('data/schedule_new.json');
                 const response = await fetch('data.json');
-                if (!response.ok) throw new Error('Failed to load data file');
+                if (!response.ok) throw new Error('Unable to load data file');
                 const data = await response.json();
                 
-                // Process data in new format
+                // Process new format data
                 tasks = generateEventInstances(data.events || []);
                 
-                // Update interface
+                // Update UI
                 updateUI();
                 showToast('Data loaded successfully!', 'success');
             } catch (error) {
@@ -1119,7 +1127,7 @@
                     },
                     {
                         "category": "weekly",
-                        "date": new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In two days
+                        "date": new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Two days later
                         "description": "Weekly team meeting to discuss project progress and next week's plan",
                         "duration": "1:30",
                         "id": 3,
@@ -1132,8 +1140,8 @@
                     {
                         "banned": ["Saturday", "Sunday"],
                         "category": "weekday",
-                        "description": "Weekday fitness plan to maintain physical health",
-                        "end_date": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In one month
+                        "description": "Workday fitness plan to maintain physical health",
+                        "end_date": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // One month later
                         "id": 4,
                         "priority": "Medium",
                         "repetition": "Daily",
@@ -1169,20 +1177,20 @@
                     },
                     {
                         "category": "once",
-                        "date": new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // In one week
-                        "description": "Project demonstration meeting with client",
+                        "date": new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // One week later
+                        "description": "Project presentation meeting with client",
                         "duration": "1:00",
                         "id": 7,
                         "priority": "High",
                         "repetition": "Once",
                         "start_time": "14:00",
-                        "title": "Client Demo Meeting",
+                        "title": "Client Presentation",
                         "type": "schedule"
                     },
                     {
                         "banned": [],
                         "category": "daily",
-                        "description": "Daily reading and learning time",
+                        "description": "Daily reading and study time",
                         "end_date": "-1",
                         "id": 8,
                         "priority": "Medium",
@@ -1209,14 +1217,35 @@
             const originalEvent = {...event};
             
             if (event.repetition === 'Once') {
-                // One-time event - check if in banned dates
+                // One-time event - check if in excluded dates
                 if (!isDateBanned(new Date(event.date), event.banned)) {
                     // Fix: Use local date format
                     const localDateString = formatLocalDate(new Date(event.date));
                     const instance = createEventInstance(event, localDateString);
                     if (instance) instances.push(instance);
                 }
-            } else {
+            }else if (event.repetition === 'Custom') {
+            // Handle custom recurring events
+            if (event.subevents && Array.isArray(event.subevents)) {
+                event.subevents.forEach(subEvent => {
+                    // Check if date is in excluded range
+                    if (!isDateBanned(new Date(subEvent.date), event.banned)) {
+                        const localDateString = formatLocalDate(new Date(subEvent.date));
+                        const instance = createEventInstance(event, localDateString);
+                        
+                        // If each sub-event can have different times, use sub-event time
+                        if (!event.same_time_each_day && subEvent.time) {
+                            instance.time = subEvent.time;
+                        }
+                        
+                        // Set sub-event completion status
+                        instance.completed = subEvent.completed || false;
+                        
+                        if (instance) instances.push(instance);
+                    }
+                });
+            }
+        } else {
                 // Recurring events - generate instances within specified date range
                 const eventInstances = generateRecurringEvents(event, startDate, endDate);
                 instances.push(...eventInstances);
@@ -1235,11 +1264,11 @@
             let currentDate = new Date(start);
             
             while (currentDate <= end) {
-                // Check if date is banned
+                // Check if in excluded dates
                 if (!isDateBanned(currentDate, event.banned)) {
-                    // Check if date is in enabled days/weeks
+                    // Check if in enabled dates/days
                     if (isDateEnabled(currentDate, event)) {
-                        // Fix: Use local date string to avoid time zone offset
+                        // Fix: Use local date string to avoid timezone offset
                         const localDateString = formatLocalDate(currentDate);
                         const instance = createEventInstance(event, localDateString);
                         if (instance) instances.push(instance);
@@ -1253,7 +1282,7 @@
             return instances;
         }
 
-        // Check if date is in banned range (closed interval)
+        // Check if date is in excluded range (inclusive both ends)
         function isDateBanned(date, bannedRanges) {
             if (!bannedRanges || !bannedRanges.length) return false;
             
@@ -1265,13 +1294,13 @@
                 const startOfDay = new Date(start);
                 startOfDay.setHours(0, 0, 0, 0);
                 
-                // Add one day to end date, then set to end of previous day (23:59:59)
+                // Add one day to end date, then set to previous day's end time (23:59:59)
                 const endOfDay = new Date(end);
                 endOfDay.setDate(endOfDay.getDate() + 1); // Add one day
-                endOfDay.setHours(0, 0, 0, 0); // Set to start of new day
+                endOfDay.setHours(0, 0, 0, 0); // Set to beginning of new day
                 endOfDay.setMilliseconds(endOfDay.getMilliseconds() - 1); // Subtract 1ms to get end of previous day
                 
-                // Closed interval comparison
+                // Inclusive range comparison
                 if (date >= startOfDay && date <= endOfDay) {
                     return true;
                 }
@@ -1280,7 +1309,7 @@
             return false;
         }
 
-        // Add date formatting function to ensure local date is used
+        // Add date formatting function to ensure local date usage
         function formatLocalDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1297,11 +1326,11 @@
                 const dayOfWeek = date.getDay();
                 return event.enabled_days && event.enabled_days.includes(dayOfWeek);
             } else if (event.repetition === 'Monthly') {
-                // Check specific days of the month
+                // Check which days of month
                 const dayOfMonth = date.getDate();
                 return event.enabled_days && event.enabled_days.includes(dayOfMonth);
             } else if (event.repetition === 'Yearly') {
-                // Check specific date each year (format: "MM-DD")
+                // Check specific dates each year (format: "MM-DD")
                 const monthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                 return event.enabled_days && event.enabled_days.includes(monthDay);
             }
@@ -1328,7 +1357,9 @@
                 end_date: event.end_date,
                 banned: event.banned,
                 enabled_days: event.enabled_days,
-                completed: false, // Not completed by default
+                same_time_each_day: event.same_time_each_day, // New
+                subevents: event.subevents, // New
+                completed: false, // Default not completed
                 originalEvent: event // Save original event data
             };
         }
@@ -1350,7 +1381,7 @@
             showToast('Data exported successfully!', 'success');
         }
 
-        // Update interface
+        // Update UI
         function updateUI() {
             renderTodayTasks();
             updateStatistics();
@@ -1391,7 +1422,7 @@
         function getEventTypeText(type) {
             const texts = {
                 point: 'Time Point',
-                schedule: 'Time Period',
+                schedule: 'Time Slot',
                 deadline: 'Deadline'
             };
             return texts[type] || type;
@@ -1417,7 +1448,7 @@
             countElement.textContent = `${todayTasks.length} tasks`;
             
             if (todayTasks.length === 0) {
-                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>No schedule for today, enjoy your day!</div>';
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>No schedule today, enjoy a relaxing day!</div>';
                 return;
             }
             
@@ -1427,13 +1458,13 @@
                 if (task.type === 'schedule') {
                     timeInfo = `${task.startTime || '00:00'} - ${task.endTime || '00:00'}`;
                     if (task.endTime && task.endTime < task.startTime) {
-                        timeInfo += ' (Cross-day)';
+                        timeInfo += ' (multi-day)';
                     }
                 } else {
                     timeInfo = task.time || '00:00';
                 }
                 
-                // Check if it's a recurring event
+                // Check if recurring event
                 const isRecurring = task.repetition && task.repetition !== 'Once';
                 
                 return `
@@ -1473,7 +1504,7 @@
         function updateStatistics() {
             const today = new Date().toISOString().split('T')[0];
             const weekStart = new Date();
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start from this Sunday
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of this week
             
             const weekTasks = tasks.filter(task => {
                 const taskDate = new Date(task.date);
@@ -1502,9 +1533,9 @@
                 const endTime = event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 timeInfo = `${startTime} - ${endTime}`;
                 
-                // Add note if it's a cross-day event
+                // Add note for multi-day events
                 if (task.endTime && task.endTime < task.startTime) {
-                    timeInfo += ' (Cross-day Event)';
+                    timeInfo += ' (Multi-day event)';
                 }
             } else {
                 timeInfo = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
@@ -1517,8 +1548,8 @@
                 const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
                 const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
                 durationText = durationHours > 0 ? 
-                    `${durationHours}h${durationMinutes > 0 ? `${durationMinutes}m` : ''}` : 
-                    `${durationMinutes}m`;
+                    `${durationHours} hour${durationHours > 1 ? 's' : ''}${durationMinutes > 0 ? ` ${durationMinutes} minute${durationMinutes > 1 ? 's' : ''}` : ''}` : 
+                    `${durationMinutes} minute${durationMinutes > 1 ? 's' : ''}`;
             }
             
             // Set category icons
@@ -1532,16 +1563,17 @@
             
             // Populate modal content
             document.getElementById('taskDetailTitle').textContent = event.title;
+            document.getElementById('taskDetailId').textContent = 'ID: ' + event.id;
             document.getElementById('taskDetailDescription').textContent = task.description || 'No description';
             document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + ' Priority';
             document.getElementById('taskDetailPriority').className = 'badge ' + getPriorityBadgeClass(task.priority);
             document.getElementById('taskDetailCategory').textContent = task.category;
             document.getElementById('taskDetailStatus').textContent = task.completed ? 'Completed' : 'Pending';
             document.getElementById('taskDetailStatus').className = task.completed ? 'task-status status-completed' : 'task-status status-pending';
-            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('en-US');
+            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('en-GB');
             document.getElementById('taskDetailTime').textContent = timeInfo;
             document.getElementById('taskDetailType').textContent = getEventTypeText(task.type);
-            document.getElementById('taskDetailRepetition').textContent = task.repetition || 'One-time';
+            document.getElementById('taskDetailRepetition').textContent = getRepetitionText(task.repetition);
             document.getElementById('taskCategoryIcon').className = categoryIcons[task.category] || 'bi-tag';
             document.getElementById('taskDetailCategoryFull').textContent = task.category;
             
@@ -1553,19 +1585,48 @@
                 recurrenceDetails.style.display = 'block';
                 recurringBadge.style.display = 'inline-flex';
                 
-                document.getElementById('taskDetailStartDate').textContent = 
-                    task.start_date === '-1' ? 'Unlimited' : new Date(task.start_date).toLocaleDateString('en-US');
-                document.getElementById('taskDetailEndDate').textContent = 
-                    task.end_date === '-1' ? 'Unlimited' : new Date(task.end_date).toLocaleDateString('en-US');
-                
-                // Handle banned dates
-                if (task.banned && task.banned.length > 0) {
-                    const bannedText = task.banned.map(range => 
-                        `${new Date(range.l).toLocaleDateString('en-US')} to ${new Date(range.r).toLocaleDateString('en-US')}`
-                    ).join('; ');
-                    document.getElementById('taskDetailBanned').textContent = bannedText;
+                // Handle special display for Custom type
+                if (task.repetition === 'Custom') {
+                    document.getElementById('taskDetailStartDate').textContent = 'Custom Dates';
+                    document.getElementById('taskDetailEndDate').textContent = 'Multiple Specific Dates';
+                    
+                    if (task.subevents && task.subevents.length > 0) {
+                        const subeventCount = task.subevents.length;
+                        document.getElementById('taskDetailBanned').textContent = `${subeventCount} specific dates`;
+                        
+                        // Add sub-event list to description
+                        if (subeventCount > 0) {
+                            const subeventsList = task.subevents.map(sub => 
+                                `${new Date(sub.date).toLocaleDateString('en-GB')}${sub.time ? ` ${sub.time}` : ''}`
+                            ).join('; ');
+                            
+                            // Append sub-event info if there's description content
+                            const descriptionEl = document.getElementById('taskDetailDescription');
+                            if (descriptionEl.textContent === 'No description') {
+                                descriptionEl.textContent = `Custom Dates: ${subeventsList}`;
+                            } else {
+                                descriptionEl.textContent += `\n\nCustom Dates: ${subeventsList}`;
+                            }
+                        }
+                    } else {
+                        document.getElementById('taskDetailBanned').textContent = 'No specific dates';
+                    }
                 } else {
-                    document.getElementById('taskDetailBanned').textContent = 'None';
+                    // Existing handling for other repetition types
+                    document.getElementById('taskDetailStartDate').textContent = 
+                        task.start_date === '-1' ? 'No limit' : new Date(task.start_date).toLocaleDateString('en-GB');
+                    document.getElementById('taskDetailEndDate').textContent = 
+                        task.end_date === '-1' ? 'No limit' : new Date(task.end_date).toLocaleDateString('en-GB');
+                    
+                    // Handle excluded dates
+                    if (task.banned && task.banned.length > 0) {
+                        const bannedText = task.banned.map(range => 
+                            `${new Date(range.l).toLocaleDateString('en-GB')} to ${new Date(range.r).toLocaleDateString('en-GB')}`
+                        ).join('; ');
+                        document.getElementById('taskDetailBanned').textContent = bannedText;
+                    } else {
+                        document.getElementById('taskDetailBanned').textContent = 'None';
+                    }
                 }
             } else {
                 recurrenceDetails.style.display = 'none';
@@ -1575,6 +1636,19 @@
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
             modal.show();
+        }
+
+        // Get repetition type text (new helper function)
+        function getRepetitionText(repetition) {
+            const texts = {
+                'Once': 'One-time',
+                'Daily': 'Daily',
+                'Weekly': 'Weekly',
+                'Monthly': 'Monthly',
+                'Yearly': 'Yearly',
+                'Custom': 'Custom'
+            };
+            return texts[repetition] || repetition;
         }
 
         // Set up event listeners
@@ -1598,7 +1672,7 @@
                 exportData();
             });
 
-            // Initialize theme selector modal
+            // Add theme selector modal initialization
             initializeThemeSelector();
             
             // Apply saved theme on page load
@@ -1619,7 +1693,7 @@
                 {
                     id: 'green',
                     name: 'Green Theme',
-                    description: 'Natural, growing, balanced',
+                    description: 'Natural, growth, balance',
                     primary: '#4cc9f0',
                     secondary: '#4895ef'
                 },
@@ -1640,7 +1714,7 @@
                 {
                     id: 'red',
                     name: 'Red Theme',
-                    description: 'Urgent, important, dynamic',
+                    description: 'Urgent, important, energetic',
                     primary: '#f72585',
                     secondary: '#b5179e'
                 },
@@ -1667,7 +1741,7 @@
                 </div>
             `).join('');
             
-            // Add theme selection event - apply theme immediately without closing popup
+            // Add theme selection events - apply immediately without closing popup
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.addEventListener('click', function() {
                     const selectedTheme = this.getAttribute('data-theme');
@@ -1687,7 +1761,7 @@
                     const themeName = themeOptions.find(t => t.id === selectedTheme).name;
                     document.getElementById('current-theme-name').textContent = themeName;
                     
-                    // Show immediate feedback
+                    // Show instant feedback
                     showThemeAppliedFeedback(this);
                 });
             });
@@ -1745,11 +1819,11 @@
             }, 1000);
         }
 
-        // Modify changeTheme function with smoother transition
+        // Modify changeTheme function for smoother transitions
         function changeTheme(theme) {
             const root = document.documentElement;
             
-            // Add theme switch transition class
+            // Add theme transition class
             document.body.classList.add('theme-changing');
             
             // Update CSS variables based on selected theme
@@ -1833,7 +1907,7 @@
             
             document.body.appendChild(toast);
             
-            // Auto remove notification
+            // Auto-remove notification
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => {
@@ -1876,7 +1950,7 @@
             toast.show();
         }
         
-        // Export PDF function
+        // Export PDF functionality
         document.getElementById('export-pdf').addEventListener('click', function() {
             // Save current task data to localStorage
             localStorage.setItem('pdfExportData', JSON.stringify(tasks));

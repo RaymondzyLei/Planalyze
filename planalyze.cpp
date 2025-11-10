@@ -185,6 +185,12 @@ bool write_to_file(const std::string& filename, const std::string& content) {
 }
 
 void _help_all() {
+    printf("  ____   _                       _                  \n");
+    printf(" |  _ \\ | |  __ _  _ __    __ _ | | _   _  ____ ___ \n");
+    printf(" | |_) || | / _` || '_ \\  / _` || || | | ||_  // _ \\\n");
+    printf(" |  __/ | || (_| || | | || (_| || || |_| | / /|  __/\n");
+    printf(" |_|    |_| \\__,_||_| |_| \\__,_||_| \\__, |/___|\\___|\n");
+    printf("                                    |___/           \n");
     std::cout << "Start your journy with Planalyze right now!" << std::endl;
     std::cout << "Usage: " << std::endl;
     std::cout << "  ./planalyze.exe [--help|-h] (<Command>)     show help for a command or all commands" << std::endl;
@@ -372,6 +378,7 @@ void add(int argc, char* argv[]) {
                         dates.insert(s);
                         return true;
                     });
+                    if (tmp["date"] == "end") break;
                     tmp["completed"] = false;
                     new_event["subevents"].push_back(tmp);
                 }
@@ -390,6 +397,7 @@ void add(int argc, char* argv[]) {
                         dates.insert(s);
                         return true;
                     });
+                    if (tmp["date"] == "end") break;
                     if (argv0 == "schedule") {
                         tmp["start_time"] = read_time("Start Time(" + to_string(n) + "): ").dump();
                         tmp["duration"] = read_duration("Duration(" + to_string(n) + "): ").dump();
