@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Schedule Planner - Planalyze</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    
+    <style>
+    :root {
+        /* Current theme variables (default blue) */
+        --primary-color: #4361ee;
+        --secondary-color: #3f37c9;
+        --primary-color-rgb: 67, 97, 238;
+        
+        /* Other colors remain unchanged */
+        --success-color: #4cc9f0;
+        --danger-color: #f72585;
+        --warning-color: #f8961e;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+    }
+    
+    /* Background image styles */
+    body {
+        background-image: url('data/bg.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        position: relative;
+        min-height: 100vh;
+    }
+    
+    .card {
+        background-color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .container {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.95);
+    }
+    
+    .navbar {
+        background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.95), rgba(63, 55, 201, 0.95)) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    footer {
+        background-color: rgba(33, 37, 41, 0.95) !important;
+        backdrop-filter: blur(10px);
+    }
+    
+    .modal-content {
+        background-color: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+    }
+    
+    /* Global theme transition effect */
+    body.theme-changing * {
+        transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease !important;
+    }
+    
+    .navbar, .card, .btn, .fc-toolbar, .fc-event {
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+    }
+    
+    /* Theme hint animation */
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 1rem 1.5rem;
+        border: none;
+    }
+    
+    .task-item {
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+    }
+    
+    .task-id {
+        font-family: monospace;
+        font-size: 0.9rem;
+        opacity: 0.7;
+    }
+
+    .task-item:hover {
+        background-color: rgba(67, 97, 238, 0.05);
+        transform: translateX(5px);
+    }
+    
+    .priority-high {
+        border-left-color: var(--danger-color);
+    }
+    
+    .priority-medium {
+        border-left-color: var(--warning-color);
+    }
+    
+    .priority-low {
+        border-left-color: var(--success-color);
+    }
+    
+    .stats-number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .fc {
+        border-radius: 0 0 12px 12px;
+        height: 80vh;
+        min-height: 500px;
+        max-height: 800px;
+    }
+    
+    @media (max-width: 768px) {
+        .fc {
+            height: 60vh;
+            min-height: 400px;
+            max-height: 600px;
+        }
+    }
+    
+    .fc-daygrid-day-number {
+        text-decoration: none !important;
+    }
+    
+    .fc-col-header-cell-cushion {
+        text-decoration: none !important;
+    }
+    
+    .fc-toolbar {
+        padding: 1rem 1.5rem;
+        margin-bottom: 0;
+        background-color: white;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .fc-toolbar-title {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .fc-button {
+        background-color: var(--primary-color) !important;
+        border: none !important;
+        border-radius: 6px !important;
+    }
+    
+    .fc-button:hover {
+        background-color: var(--secondary-color) !important;
+    }
+    
+    .fc-daygrid-event {
+        border-radius: 6px;
+        padding: 2px 6px;
+        font-size: 0.85rem;
+    }
+    
+    .fc-event-title {
+        font-weight: 500;
+    }
+    
+    /* Modify Deadline event rendering style */
+    .fc-event.deadline-event {
+        background-color: rgba(247, 37, 133, 0.2) !important;
+        border: 2px dashed #f72585 !important;
+        color: #f72585 !important;
+        font-weight: 600;
+    }
+    
+    /* Multi-day event style */
+    .fc-event.multi-day-event {
+        border-left: 4px dashed var(--warning-color);
+    }
+    
+    /* Ensure Deadline events stand out in calendar */
+    .fc-daygrid-event.deadline-event .fc-event-title {
+        font-weight: 700;
+    }
+    
+    /* Add special marker for Deadline events in month view */
+    .fc-daygrid-event.deadline-event:before {
+        content: "!";
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-color: #f72585;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 16px;
+        margin-right: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge {
+        border-radius: 6px;
+        font-weight: 500;
+        padding: 0.4rem 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        min-height: 24px;
+        text-align: center;
+    }
+    
+    .priority-high .badge,
+    .priority-medium .badge,
+    .priority-low .badge {
+        text-align: center;
+    }
+    
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1055;
+    }
+    
+    @media (max-width: 768px) {
+        .fc-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .fc-toolbar-chunk {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toast {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+        }
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .sidebar-card {
+        margin-bottom: 1rem;
+    }
+    
+    .sidebar-card .card-body {
+        padding: 1rem;
+    }
+    
+    .sidebar-card h5 {
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-card .stats-number {
+        font-size: 1.8rem;
+    }
+    
+    .sidebar-card .btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Task detail modal style - optimized version */
+    .task-detail-modal .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+    
+    .task-detail-modal .modal-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        padding: 1.5rem 1.5rem 1rem;
+    }
+    
+    .task-detail-modal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .task-detail-modal .modal-footer {
+        border: none;
+        padding: 1rem 1.5rem 1.5rem;
+        background-color: #f8f9fa;
+    }
+    
+    /* Task detail popup label style optimization */
+    .task-detail-modal .badge {
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        min-height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.4;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+    
+    /* Special adjustment for priority labels in task detail modal */
+    .task-detail-modal .task-meta .badge {
+        font-size: 1.05rem;
+        padding: 0.7rem 1.2rem;
+        margin: 0.2rem;
+    }
+    
+    /* Status label style adjustment */
+    .task-detail-modal .task-status {
+        padding: 0.7rem 1.2rem;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 20px;
+        font-weight: 600;
+        min-height: 32px;
+    }
+    
+    /* Recurring event marker style */
+    .recurring-badge {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+        font-size: 0.85rem;
+        padding: 0.4rem 0.7rem;
+        margin-left: 0.3rem;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+    
+    /* Ensure icon and text alignment */
+    .task-detail-modal .task-detail-value {
+        align-items: center;
+        font-size: 1.05rem;
+    }
+    
+    .task-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+    
+    .task-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+    
+    .task-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-bottom: 1.2rem;
+        align-items: center;
+    }
+    
+    .task-description {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.2rem;
+        margin-bottom: 1.8rem;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+    
+    .task-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 1.8rem;
+    }
+    
+    .task-detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .task-detail-label {
+        font-size: 0.95rem;
+        color: #6c757d;
+        margin-bottom: 0.4rem;
+        font-weight: 500;
+    }
+    
+    .task-detail-value {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+    
+    .task-detail-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.7rem;
+        color: white;
+        font-size: 0.9rem;
+    }
+    
+    .priority-high .task-detail-icon {
+        background-color: var(--danger-color);
+    }
+    
+    .priority-medium .task-detail-icon {
+        background-color: var(--warning-color);
+    }
+    
+    .priority-low .task-detail-icon {
+        background-color: var(--success-color);
+    }
+    
+    .status-completed {
+        background-color: rgba(76, 201, 240, 0.15);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+    }
+    
+    .status-pending {
+        background-color: rgb(255, 0, 0);
+        color: #00ffe1;
+        border: 1px solid #0004ff;
+    }
+    
+    .close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        transition: all 0.3s;
+        font-size: 1.2rem;
+    }
+    
+    .close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+    
+    /* Event type indicator */
+    .event-type-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.4rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+    }
+    
+    .type-point {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+    }
+    
+    .type-schedule {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success-color);
+        border: 1px solid var(--success-color);
+    }
+    
+    .type-deadline {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+    }
+    
+    /*Theme selection popup section*/
+    .theme-option {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .theme-option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-option.active {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+    }
+
+    .theme-option.active::after {
+        content: "✓";
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 24px;
+        height: 24px;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    /* Theme application animation */
+    @keyframes themeApplied {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .theme-option.theme-applied {
+        animation: themeApplied 0.5s ease;
+    }
+
+    .theme-preview {
+        width: 100%;
+        height: 60px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .theme-name {
+        font-weight: 500;
+        margin-bottom: 5px;
+        font-size: 1.1rem;
+    }
+
+    .theme-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+</style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-calendar-check me-2"></i>Planalyze
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="bi bi-house me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-pdf">
+                            <i class="bi bi-file-pdf me-1"></i>Export PDF
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="export-data">
+                            <i class="bi bi-download me-1"></i>Export Data
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="container my-4">
+        <!-- Welcome Banner -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="p-4 text-white rounded-3" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                    <h1 class="display-6 mb-2">Welcome to Planalyze</h1>
+                    <p class="mb-0">Smart Time Weaver - Efficient schedule planning with complex recurring events</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Left: Calendar and Task List -->
+            <div class="col-lg-10">
+                <!-- Calendar Area -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-calendar-week me-2"></i>My Calendar
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="calendar"></div>
+                    </div>
+                </div>
+                
+                <!-- Task List -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-task me-2"></i>Today's Tasks
+                        </h5>
+                        <span class="badge bg-light text-dark" id="today-task-count">Loading...</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush" id="today-tasks">
+                            <div class="text-center p-4 text-muted">
+                                <div class="loading-spinner mb-2"></div>
+                                <div>Loading tasks...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right: Statistics and Quick Actions -->
+            <div class="col-lg-2">
+                <!-- Statistics -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up me-2"></i>This Week's Stats
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stats-number" id="total-tasks">-</div>
+                                <small class="text-muted">Total Tasks</small>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stats-number" id="completed-tasks">-</div>
+                                <small class="text-muted">Completed</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="stats-number" id="high-priority-tasks">-</div>
+                                <small class="text-muted">High Priority</small>
+                            </div>
+                            <div class="col-6">
+                                <div class="stats-number" id="completion-rate">-</div>
+                                <small class="text-muted">Completion Rate</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-lightning me-2"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary" id="refresh-data">
+                                <i class="bi bi-arrow-repeat me-2"></i>Refresh Data
+                            </button>
+                            <button class="btn btn-outline-primary" id="toggle-view">
+                                <i class="bi bi-calendar-week me-2"></i>Toggle View
+                            </button>
+                            <button class="btn btn-outline-primary" id="theme-selector-btn" data-bs-toggle="modal" data-bs-target="#themeSelectorModal">
+                                <i class="bi bi-palette me-2"></i>Select Theme
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Features -->
+                <div class="card sidebar-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-stars me-2"></i>Features
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Recurring Events</h6>
+                                <small class="text-muted">Four repetition types</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-calendar-x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Exclude Dates</h6>
+                                <small class="text-muted">Date exclusion support</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon">
+                                <i class="bi bi-share"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Data Export</h6>
+                                <small class="text-muted">Export data support</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-eyedropper"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Theme Switching</h6>
+                                <small class="text-muted">Six themes available</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div class="modal fade task-detail-modal" id="taskDetailModal" tabindex="-1" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="task-detail-header w-100">
+                        <div>
+                            <h5 class="task-title mb-1" id="taskDetailTitle">Task Title</h5>
+                            <div class="task-id text-muted small mb-2" id="taskDetailId">ID: -</div>
+                            <div class="task-meta">
+                                <span class="badge" id="taskDetailPriority">High Priority</span>
+                                <span class="badge bg-light text-dark" id="taskDetailCategory">Study</span>
+                                <span class="task-status" id="taskDetailStatus">Pending</span>
+                                <span class="recurring-badge" id="taskDetailRecurring" style="display: none;">Recurring</span>
+                            </div>
+                        </div>
+                        <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="task-description" id="taskDetailDescription">
+                        Task description will appear here...
+                    </div>
+                    
+                    <div class="task-detail-grid">
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-calendar me-1"></i>Date</span>
+                            <span class="task-detail-value" id="taskDetailDate">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-clock me-1"></i>Time</span>
+                            <span class="task-detail-value" id="taskDetailTime">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-tag me-1"></i>Event Type</span>
+                            <span class="task-detail-value" id="taskDetailType">-</span>
+                        </div>
+                        <div class="task-detail-item">
+                            <span class="task-detail-label"><i class="bi bi-arrow-repeat me-1"></i>Repetition Type</span>
+                            <span class="task-detail-value" id="taskDetailRepetition">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="task-detail-item">
+                        <span class="task-detail-label"><i class="bi bi-tags me-1"></i>Task Category</span>
+                        <span class="task-detail-value">
+                            <span class="task-detail-icon">
+                                <i class="bi" id="taskCategoryIcon"></i>
+                            </span>
+                            <span id="taskDetailCategoryFull">-</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Recurring Event Details -->
+                    <div id="recurrenceDetails" style="display: none;">
+                        <hr>
+                        <h6>Recurring Event Details</h6>
+                        <div class="task-detail-grid">
+                            <div class="task-detail-item">
+                                <span class="task-detail-label"><i class="bi bi-calendar-range me-1"></i>Start Date</span>
+                                <span class="task-detail-value" id="taskDetailStartDate">-</span>
+                            </div>
+                            <div class="task-detail-item">
+                                <span class="task-detail-label"><i class="bi bi-calendar-x me-1"></i>End Date</span>
+                                <span class="task-detail-value" id="taskDetailEndDate">-</span>
+                            </div>
+                            <div class="task-detail-item">
+                                <span class="task-detail-label"><i class="bi bi-calendar-event me-1"></i>Excluded Dates</span>
+                                <span class="task-detail-value" id="taskDetailBanned">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Theme Selection Modal -->
+    <div class="modal fade" id="themeSelectorModal" tabindex="-1" aria-labelledby="themeSelectorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="themeSelectorModalLabel">
+                        <i class="bi bi-palette me-2"></i>Select Theme Color (Applied immediately)
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row g-3" id="theme-options">
+                            <!-- Theme options will be dynamically generated via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="me-auto">
+                        <small class="text-muted">Current Theme: <span id="current-theme-name">Blue Theme</span></small>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification Toast -->
+    <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" id="successToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check-circle me-2"></i>
+                <span id="toastMessage">Operation successful!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" id="errorToast">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                <span id="errorToastMessage">Operation failed!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Planalyze - Smart Schedule Planner</h5>
+                    <p>Schedule management tool with complex recurring events and date exclusion support</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>Copyright &copy; 2025 Planalyze. Based on <a href="LICENSE">MIT License</a>.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/en-gb.js"></script>
+    
+    <script>
+        // Global variables
+        let tasks = [];
+        let calendar;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize calendar
+            initializeCalendar();
+            
+            // Load task data
+            await loadTaskData();
+            
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        // Initialize FullCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'en-gb',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day'
+                },
+                events: function(fetchInfo, successCallback, failureCallback) {
+                    // Convert tasks to FullCalendar event format
+                    const events = tasks.map(task => {
+                        let start, end;
+                        
+                        // Set start and end times based on event type
+                        if (task.type === 'schedule') {
+                            start = `${task.date}T${task.startTime}`;
+                            
+                            // Handle multi-day events
+                            if (task.endTime && task.endTime < task.startTime) {
+                                // End time is earlier than start time, indicating multi-day event
+                                const nextDay = new Date(task.date);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                const nextDayStr = nextDay.toISOString().split('T')[0];
+                                end = `${nextDayStr}T${task.endTime}`;
+                            } else {
+                                end = `${task.date}T${task.endTime || task.startTime}`;
+                            }
+                        } else {
+                            // point and deadline types use time field
+                            start = `${task.date}T${task.time}`;
+                            end = start; // Single point event, end time same as start
+                        }
+                        
+                        // Add special style class for Deadline events
+                        let className = '';
+                        if (task.type === 'deadline') {
+                            className = 'deadline-event';
+                        } else if (task.type === 'schedule' && task.endTime && task.endTime < task.startTime) {
+                            className = 'multi-day-event';
+                        }
+                        
+                        // Add recurring marker for recurring events
+                        if (task.repetition && task.repetition !== 'Once') {
+                            className += ' recurring-event';
+                        }
+                        
+                        return {
+                            id: task.id,
+                            title: task.title,
+                            start: start,
+                            end: end,
+                            extendedProps: {
+                                type: task.type,
+                                repetition: task.repetition,
+                                priority: task.priority,
+                                category: task.category,
+                                description: task.description,
+                                completed: task.completed || false,
+                                time: task.time,
+                                startTime: task.startTime,
+                                endTime: task.endTime,
+                                duration: task.duration,
+                                start_date: task.start_date,
+                                end_date: task.end_date,
+                                banned: task.banned,
+                                enabled_days: task.enabled_days,
+                                originalEvent: task.originalEvent // Save original event data
+                            },
+                            backgroundColor: getEventColor(task.priority),
+                            borderColor: getEventColor(task.priority),
+                            className: className
+                        };
+                    });
+                    successCallback(events);
+                },
+                eventClick: function(info) {
+                    showTaskDetails(info.event);
+                }
+            });
+            
+            calendar.render();
+        }
+
+        // Load task data from external JSON file
+        async function loadTaskData() {
+            try {
+                showLoadingState();
+                
+                // Use new JSON format
+                //const response = await fetch('data/schedule_new.json');
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error('Unable to load data file');
+                const data = await response.json();
+                
+                // Process new format data
+                tasks = generateEventInstances(data.events || []);
+                
+                // Update UI
+                updateUI();
+                showToast('Data loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                showToast('Unable to load task data: ' + error.message, 'error');
+                
+                // Use sample data as fallback
+                tasks = generateEventInstances([
+                    {
+                        "category": "once",
+                        "date": new Date().toISOString().split('T')[0],
+                        "description": "One-time event example",
+                        "duration": "2:00",
+                        "id": 1,
+                        "priority": "Medium",
+                        "repetition": "Once",
+                        "start_time": "12:00",
+                        "title": "One-time Event",
+                        "type": "schedule"
+                    },
+                    {
+                        "banned": [],
+                        "category": "daily",
+                        "description": "Daily recurring event example",
+                        "end_date": "-1",
+                        "id": 2,
+                        "priority": "Medium",
+                        "repetition": "Daily",
+                        "start_date": "-1",
+                        "time": "13:00",
+                        "title": "Daily Event",
+                        "type": "point"
+                    },
+                    {
+                        "category": "weekly",
+                        "date": new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Two days later
+                        "description": "Weekly team meeting to discuss project progress and next week's plan",
+                        "duration": "1:30",
+                        "id": 3,
+                        "priority": "High",
+                        "repetition": "Weekly",
+                        "start_time": "09:30",
+                        "title": "Team Weekly Meeting",
+                        "type": "schedule"
+                    },
+                    {
+                        "banned": ["Saturday", "Sunday"],
+                        "category": "weekday",
+                        "description": "Workday fitness plan to maintain physical health",
+                        "end_date": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // One month later
+                        "id": 4,
+                        "priority": "Medium",
+                        "repetition": "Daily",
+                        "start_date": new Date().toISOString().split('T')[0],
+                        "time": "18:30",
+                        "title": "Gym Workout",
+                        "type": "point"
+                    },
+                    {
+                        "category": "monthly",
+                        "date": new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString().split('T')[0], // First day of next month
+                        "description": "Monthly financial summary and budget planning",
+                        "duration": "2:00",
+                        "id": 5,
+                        "priority": "High",
+                        "repetition": "Monthly",
+                        "start_time": "15:00",
+                        "title": "Monthly Financial Meeting",
+                        "type": "schedule"
+                    },
+                    {
+                        "banned": [],
+                        "category": "weekend",
+                        "description": "Weekend family dinner time",
+                        "end_date": "-1",
+                        "id": 6,
+                        "priority": "Low",
+                        "repetition": "Weekly",
+                        "start_date": new Date().toISOString().split('T')[0],
+                        "time": "19:00",
+                        "title": "Family Dinner",
+                        "type": "point"
+                    },
+                    {
+                        "category": "once",
+                        "date": new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // One week later
+                        "description": "Project presentation meeting with client",
+                        "duration": "1:00",
+                        "id": 7,
+                        "priority": "High",
+                        "repetition": "Once",
+                        "start_time": "14:00",
+                        "title": "Client Presentation",
+                        "type": "schedule"
+                    },
+                    {
+                        "banned": [],
+                        "category": "daily",
+                        "description": "Daily reading and study time",
+                        "end_date": "-1",
+                        "id": 8,
+                        "priority": "Medium",
+                        "repetition": "Daily",
+                        "start_date": "-1",
+                        "time": "21:00",
+                        "title": "Reading Time",
+                        "type": "point"
+                    }
+                ]);
+                updateUI();
+            }
+        }
+
+        // Generate event instances (handle recurring events)
+        function generateEventInstances(events) {
+        const instances = [];
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Previous month
+        const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 0); // Three months later
+        
+        events.forEach(event => {
+            // Save original event data
+            const originalEvent = {...event};
+            
+            if (event.repetition === 'Once') {
+                // One-time event - check if in excluded dates
+                if (!isDateBanned(new Date(event.date), event.banned)) {
+                    // Fix: Use local date format
+                    const localDateString = formatLocalDate(new Date(event.date));
+                    const instance = createEventInstance(event, localDateString);
+                    if (instance) instances.push(instance);
+                }
+            }else if (event.repetition === 'Custom') {
+            // Handle custom recurring events
+            if (event.subevents && Array.isArray(event.subevents)) {
+                event.subevents.forEach(subEvent => {
+                    // Check if date is in excluded range
+                    if (!isDateBanned(new Date(subEvent.date), event.banned)) {
+                        const localDateString = formatLocalDate(new Date(subEvent.date));
+                        const instance = createEventInstance(event, localDateString);
+                        
+                        // If each sub-event can have different times, use sub-event time
+                        if (!event.same_time_each_day && subEvent.time) {
+                            instance.time = subEvent.time;
+                        }
+                        
+                        // Set sub-event completion status
+                        instance.completed = subEvent.completed || false;
+                        
+                        if (instance) instances.push(instance);
+                    }
+                });
+            }
+        } else {
+                // Recurring events - generate instances within specified date range
+                const eventInstances = generateRecurringEvents(event, startDate, endDate);
+                instances.push(...eventInstances);
+            }
+        });
+        
+        return instances;
+    }
+
+        // Generate recurring event instances
+        function generateRecurringEvents(event, startDate, endDate) {
+            const instances = [];
+            const start = event.start_date === '-1' ? startDate : new Date(event.start_date);
+            const end = event.end_date === '-1' ? endDate : new Date(event.end_date);
+            
+            let currentDate = new Date(start);
+            
+            while (currentDate <= end) {
+                // Check if in excluded dates
+                if (!isDateBanned(currentDate, event.banned)) {
+                    // Check if in enabled dates/days
+                    if (isDateEnabled(currentDate, event)) {
+                        // Fix: Use local date string to avoid timezone offset
+                        const localDateString = formatLocalDate(currentDate);
+                        const instance = createEventInstance(event, localDateString);
+                        if (instance) instances.push(instance);
+                    }
+                }
+                
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return instances;
+        }
+
+        // Check if date is in excluded range (inclusive both ends)
+        function isDateBanned(date, bannedRanges) {
+            if (!bannedRanges || !bannedRanges.length) return false;
+            
+            for (const range of bannedRanges) {
+                const start = new Date(range.l);
+                const end = new Date(range.r);
+                
+                // Set start date to beginning of day (00:00:00)
+                const startOfDay = new Date(start);
+                startOfDay.setHours(0, 0, 0, 0);
+                
+                // Add one day to end date, then set to previous day's end time (23:59:59)
+                const endOfDay = new Date(end);
+                endOfDay.setDate(endOfDay.getDate() + 1); // Add one day
+                endOfDay.setHours(0, 0, 0, 0); // Set to beginning of new day
+                endOfDay.setMilliseconds(endOfDay.getMilliseconds() - 1); // Subtract 1ms to get end of previous day
+                
+                // Inclusive range comparison
+                if (date >= startOfDay && date <= endOfDay) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Add date formatting function to ensure local date usage
+        function formatLocalDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Check if date is in enabled range (based on repetition type)
+        function isDateEnabled(date, event) {
+            if (event.repetition === 'Daily') {
+                return true; // Repeat daily
+            } else if (event.repetition === 'Weekly') {
+                // Fix: Use getDay() to get day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
+                const dayOfWeek = date.getDay();
+                return event.enabled_days && event.enabled_days.includes(dayOfWeek);
+            } else if (event.repetition === 'Monthly') {
+                // Check which days of month
+                const dayOfMonth = date.getDate();
+                return event.enabled_days && event.enabled_days.includes(dayOfMonth);
+            } else if (event.repetition === 'Yearly') {
+                // Check specific dates each year (format: "MM-DD")
+                const monthDay = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                return event.enabled_days && event.enabled_days.includes(monthDay);
+            }
+            
+            return false;
+        }
+
+        // Create event instance
+        function createEventInstance(event, date) {
+            return {
+                id: `${event.id}-${date}`, // Use date to ensure uniqueness
+                type: event.type,
+                title: event.title,
+                description: event.description,
+                date: date,
+                time: event.time,
+                startTime: event.start_time,
+                endTime: event.end_time,
+                duration: event.duration,
+                priority: event.priority,
+                category: event.category,
+                repetition: event.repetition,
+                start_date: event.start_date,
+                end_date: event.end_date,
+                banned: event.banned,
+                enabled_days: event.enabled_days,
+                same_time_each_day: event.same_time_each_day, // New
+                subevents: event.subevents, // New
+                completed: false, // Default not completed
+                originalEvent: event // Save original event data
+            };
+        }
+
+        // Export data as JSON file
+        function exportData() {
+            const dataStr = JSON.stringify({ events: tasks.map(t => t.originalEvent) }, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'schedule-data.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('Data exported successfully!', 'success');
+        }
+
+        // Update UI
+        function updateUI() {
+            renderTodayTasks();
+            updateStatistics();
+            calendar.refetchEvents();
+        }
+
+        // Get event color based on priority
+        function getEventColor(priority) {
+            const colors = {
+                High: '#f72585',    // High priority - red
+                Medium: '#f8961e', // Medium priority - orange
+                Low: '#4cc9f0'     // Low priority - blue
+            };
+            return colors[priority] || '#4361ee'; // Default color
+        }
+
+        // Get badge color class based on priority
+        function getPriorityBadgeClass(priority) {
+            const classes = {
+                High: 'bg-danger',
+                Medium: 'bg-warning',
+                Low: 'bg-success'
+            };
+            return classes[priority] || 'bg-secondary';
+        }
+
+        // Get priority text
+        function getPriorityText(priority) {
+            const texts = {
+                High: 'High',
+                Medium: 'Medium',
+                Low: 'Low'
+            };
+            return texts[priority] || 'Normal';
+        }
+
+        // Get event type text
+        function getEventTypeText(type) {
+            const texts = {
+                point: 'Time Point',
+                schedule: 'Time Slot',
+                deadline: 'Deadline'
+            };
+            return texts[type] || type;
+        }
+
+        // Get event type style class
+        function getEventTypeClass(type) {
+            const classes = {
+                point: 'type-point',
+                schedule: 'type-schedule',
+                deadline: 'type-deadline'
+            };
+            return classes[type] || '';
+        }
+
+        // Render today's tasks
+        function renderTodayTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayTasks = tasks.filter(task => task.date === today);
+            const container = document.getElementById('today-tasks');
+            const countElement = document.getElementById('today-task-count');
+            
+            countElement.textContent = `${todayTasks.length} tasks`;
+            
+            if (todayTasks.length === 0) {
+                container.innerHTML = '<div class="text-center p-4 text-muted"><i class="bi bi-inbox display-4 d-block mb-2"></i>No schedule today, enjoy a relaxing day!</div>';
+                return;
+            }
+            
+            container.innerHTML = todayTasks.map(task => {
+                // Display different time information based on event type
+                let timeInfo = '';
+                if (task.type === 'schedule') {
+                    timeInfo = `${task.startTime || '00:00'} - ${task.endTime || '00:00'}`;
+                    if (task.endTime && task.endTime < task.startTime) {
+                        timeInfo += ' (multi-day)';
+                    }
+                } else {
+                    timeInfo = task.time || '00:00';
+                }
+                
+                // Check if recurring event
+                const isRecurring = task.repetition && task.repetition !== 'Once';
+                
+                return `
+                <div class="list-group-item task-item priority-${task.priority.toLowerCase()} ${task.completed ? 'opacity-50' : ''}">
+                    <div class="d-flex w-100 justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 ${task.completed ? 'text-decoration-line-through' : ''}">${task.title}</h6>
+                                <span class="badge ${getPriorityBadgeClass(task.priority)}">${getPriorityText(task.priority)} Priority</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="event-type-indicator ${getEventTypeClass(task.type)}">
+                                    <i class="bi ${task.type === 'point' ? 'bi-dot' : task.type === 'schedule' ? 'bi-clock' : 'bi-alarm'} me-1"></i>
+                                    ${getEventTypeText(task.type)}
+                                </span>
+                                ${isRecurring ? '<span class="recurring-badge">Recurring</span>' : ''}
+                            </div>
+                            ${task.description ? `<p class="mb-1 small text-muted">${task.description}</p>` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>${timeInfo}</small>
+                                <div>
+                                    ${task.completed ? 
+                                        '<span class="badge bg-success me-1"><i class="bi bi-check-circle me-1"></i>Completed</span>' : 
+                                        '<span class="badge bg-secondary me-1"><i class="bi bi-clock me-1"></i>Pending</span>'
+                                    }
+                                    <span class="badge bg-light text-dark">${task.category}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const today = new Date().toISOString().split('T')[0];
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of this week
+            
+            const weekTasks = tasks.filter(task => {
+                const taskDate = new Date(task.date);
+                return taskDate >= weekStart && taskDate <= new Date();
+            });
+            
+            const totalTasks = weekTasks.length;
+            const completedTasks = weekTasks.filter(task => task.completed).length;
+            const highPriorityTasks = weekTasks.filter(task => task.priority === 'High').length;
+            const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+            document.getElementById('high-priority-tasks').textContent = highPriorityTasks;
+            document.getElementById('completion-rate').textContent = `${completionRate}%`;
+        }
+
+        // Show task details
+        function showTaskDetails(event) {
+            const task = event.extendedProps;
+            
+            // Set time information based on event type
+            let timeInfo = '';
+            if (task.type === 'schedule') {
+                const startTime = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const endTime = event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                timeInfo = `${startTime} - ${endTime}`;
+                
+                // Add note for multi-day events
+                if (task.endTime && task.endTime < task.startTime) {
+                    timeInfo += ' (Multi-day event)';
+                }
+            } else {
+                timeInfo = event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            // Calculate duration (only for schedule type)
+            let durationText = '';
+            if (task.type === 'schedule') {
+                const durationMs = event.end - event.start;
+                const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+                const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+                durationText = durationHours > 0 ? 
+                    `${durationHours} hour${durationHours > 1 ? 's' : ''}${durationMinutes > 0 ? ` ${durationMinutes} minute${durationMinutes > 1 ? 's' : ''}` : ''}` : 
+                    `${durationMinutes} minute${durationMinutes > 1 ? 's' : ''}`;
+            }
+            
+            // Set category icons
+            const categoryIcons = {
+                'Study': 'bi-journal-text',
+                'Work': 'bi-briefcase',
+                'Personal': 'bi-person',
+                'Health': 'bi-heart',
+                'Social': 'bi-people'
+            };
+            
+            // Populate modal content
+            document.getElementById('taskDetailTitle').textContent = event.title;
+            document.getElementById('taskDetailId').textContent = 'ID: ' + event.id;
+            document.getElementById('taskDetailDescription').textContent = task.description || 'No description';
+            document.getElementById('taskDetailPriority').textContent = getPriorityText(task.priority) + ' Priority';
+            document.getElementById('taskDetailPriority').className = 'badge ' + getPriorityBadgeClass(task.priority);
+            document.getElementById('taskDetailCategory').textContent = task.category;
+            document.getElementById('taskDetailStatus').textContent = task.completed ? 'Completed' : 'Pending';
+            document.getElementById('taskDetailStatus').className = task.completed ? 'task-status status-completed' : 'task-status status-pending';
+            document.getElementById('taskDetailDate').textContent = event.start.toLocaleDateString('en-GB');
+            document.getElementById('taskDetailTime').textContent = timeInfo;
+            document.getElementById('taskDetailType').textContent = getEventTypeText(task.type);
+            document.getElementById('taskDetailRepetition').textContent = getRepetitionText(task.repetition);
+            document.getElementById('taskCategoryIcon').className = categoryIcons[task.category] || 'bi-tag';
+            document.getElementById('taskDetailCategoryFull').textContent = task.category;
+            
+            // Handle recurring event details
+            const recurrenceDetails = document.getElementById('recurrenceDetails');
+            const recurringBadge = document.getElementById('taskDetailRecurring');
+            
+            if (task.repetition && task.repetition !== 'Once') {
+                recurrenceDetails.style.display = 'block';
+                recurringBadge.style.display = 'inline-flex';
+                
+                // Handle special display for Custom type
+                if (task.repetition === 'Custom') {
+                    document.getElementById('taskDetailStartDate').textContent = 'Custom Dates';
+                    document.getElementById('taskDetailEndDate').textContent = 'Multiple Specific Dates';
+                    
+                    if (task.subevents && task.subevents.length > 0) {
+                        const subeventCount = task.subevents.length;
+                        document.getElementById('taskDetailBanned').textContent = `${subeventCount} specific dates`;
+                        
+                        // Add sub-event list to description
+                        if (subeventCount > 0) {
+                            const subeventsList = task.subevents.map(sub => 
+                                `${new Date(sub.date).toLocaleDateString('en-GB')}${sub.time ? ` ${sub.time}` : ''}`
+                            ).join('; ');
+                            
+                            // Append sub-event info if there's description content
+                            const descriptionEl = document.getElementById('taskDetailDescription');
+                            if (descriptionEl.textContent === 'No description') {
+                                descriptionEl.textContent = `Custom Dates: ${subeventsList}`;
+                            } else {
+                                descriptionEl.textContent += `\n\nCustom Dates: ${subeventsList}`;
+                            }
+                        }
+                    } else {
+                        document.getElementById('taskDetailBanned').textContent = 'No specific dates';
+                    }
+                } else {
+                    // Existing handling for other repetition types
+                    document.getElementById('taskDetailStartDate').textContent = 
+                        task.start_date === '-1' ? 'No limit' : new Date(task.start_date).toLocaleDateString('en-GB');
+                    document.getElementById('taskDetailEndDate').textContent = 
+                        task.end_date === '-1' ? 'No limit' : new Date(task.end_date).toLocaleDateString('en-GB');
+                    
+                    // Handle excluded dates
+                    if (task.banned && task.banned.length > 0) {
+                        const bannedText = task.banned.map(range => 
+                            `${new Date(range.l).toLocaleDateString('en-GB')} to ${new Date(range.r).toLocaleDateString('en-GB')}`
+                        ).join('; ');
+                        document.getElementById('taskDetailBanned').textContent = bannedText;
+                    } else {
+                        document.getElementById('taskDetailBanned').textContent = 'None';
+                    }
+                }
+            } else {
+                recurrenceDetails.style.display = 'none';
+                recurringBadge.style.display = 'none';
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            modal.show();
+        }
+
+        // Get repetition type text (new helper function)
+        function getRepetitionText(repetition) {
+            const texts = {
+                'Once': 'One-time',
+                'Daily': 'Daily',
+                'Weekly': 'Weekly',
+                'Monthly': 'Monthly',
+                'Yearly': 'Yearly',
+                'Custom': 'Custom'
+            };
+            return texts[repetition] || repetition;
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            document.getElementById('refresh-data').addEventListener('click', async function() {
+                await loadTaskData();
+            });
+            
+            document.getElementById('toggle-view').addEventListener('click', function() {
+                const currentView = calendar.view.type;
+                if (currentView === 'dayGridMonth') {
+                    calendar.changeView('timeGridWeek');
+                } else if (currentView === 'timeGridWeek') {
+                    calendar.changeView('timeGridDay');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            });
+            
+            document.getElementById('export-data').addEventListener('click', function() {
+                exportData();
+            });
+
+            // Add theme selector modal initialization
+            initializeThemeSelector();
+            
+            // Apply saved theme on page load
+            const savedTheme = localStorage.getItem('theme') || 'blue';
+            changeTheme(savedTheme);
+        }
+
+        // Modify initializeThemeSelector function
+        function initializeThemeSelector() {
+            const themeOptions = [
+                {
+                    id: 'blue',
+                    name: 'Blue Theme',
+                    description: 'Professional, calm, focused',
+                    primary: '#4361ee',
+                    secondary: '#3f37c9'
+                },
+                {
+                    id: 'green',
+                    name: 'Green Theme',
+                    description: 'Natural, growth, balance',
+                    primary: '#4cc9f0',
+                    secondary: '#4895ef'
+                },
+                {
+                    id: 'purple',
+                    name: 'Purple Theme',
+                    description: 'Creative, mysterious, elegant',
+                    primary: '#7209b7',
+                    secondary: '#560bad'
+                },
+                {
+                    id: 'orange',
+                    name: 'Orange Theme',
+                    description: 'Energetic, passionate, warm',
+                    primary: '#f8961e',
+                    secondary: '#f3722c'
+                },
+                {
+                    id: 'red',
+                    name: 'Red Theme',
+                    description: 'Urgent, important, energetic',
+                    primary: '#f72585',
+                    secondary: '#b5179e'
+                },
+                {
+                    id: 'teal',
+                    name: 'Teal Theme',
+                    description: 'Fresh, modern, calm',
+                    primary: '#06d6a0',
+                    secondary: '#04966b'
+                }
+            ];
+            
+            // Generate theme options
+            const themeOptionsContainer = document.getElementById('theme-options');
+            themeOptionsContainer.innerHTML = themeOptions.map(theme => `
+                <div class="col-md-4">
+                    <div class="theme-option" data-theme="${theme.id}">
+                        <div class="theme-preview" style="background: linear-gradient(135deg, ${theme.primary}, ${theme.secondary});">
+                            ${theme.name}
+                        </div>
+                        <div class="theme-name">${theme.name}</div>
+                        <div class="theme-description">${theme.description}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add theme selection events - apply immediately without closing popup
+            document.querySelectorAll('.theme-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const selectedTheme = this.getAttribute('data-theme');
+                    
+                    // Remove all active classes
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Add active class to current option
+                    this.classList.add('active');
+                    
+                    // Apply theme immediately
+                    changeTheme(selectedTheme);
+                    
+                    // Update current theme name display
+                    const themeName = themeOptions.find(t => t.id === selectedTheme).name;
+                    document.getElementById('current-theme-name').textContent = themeName;
+                    
+                    // Show instant feedback
+                    showThemeAppliedFeedback(this);
+                });
+            });
+            
+            // Initialize selection state when modal is shown
+            document.getElementById('themeSelectorModal').addEventListener('show.bs.modal', function() {
+                const currentTheme = localStorage.getItem('theme') || 'blue';
+                const currentOption = document.querySelector(`.theme-option[data-theme="${currentTheme}"]`);
+                const themeName = themeOptions.find(t => t.id === currentTheme).name;
+                
+                document.getElementById('current-theme-name').textContent = themeName;
+                
+                if (currentOption) {
+                    // Remove all active classes
+                    document.querySelectorAll('.theme-option').forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // Add active class to current theme
+                    currentOption.classList.add('active');
+                }
+            });
+        }
+
+        // Add theme application feedback function
+        function showThemeAppliedFeedback(element) {
+            // Add application feedback animation
+            element.classList.add('theme-applied');
+            
+            // Create feedback element
+            const feedback = document.createElement('div');
+            feedback.className = 'theme-feedback';
+            feedback.textContent = '✓ Applied';
+            feedback.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 14px;
+                font-weight: bold;
+                z-index: 10;
+                pointer-events: none;
+            `;
+            
+            element.appendChild(feedback);
+            
+            // Remove feedback element
+            setTimeout(() => {
+                feedback.remove();
+                element.classList.remove('theme-applied');
+            }, 1000);
+        }
+
+        // Modify changeTheme function for smoother transitions
+        function changeTheme(theme) {
+            const root = document.documentElement;
+            
+            // Add theme transition class
+            document.body.classList.add('theme-changing');
+            
+            // Update CSS variables based on selected theme
+            switch(theme) {
+                case 'green':
+                    root.style.setProperty('--primary-color', '#4cc9f0');
+                    root.style.setProperty('--secondary-color', '#4895ef');
+                    root.style.setProperty('--primary-color-rgb', '76, 201, 240');
+                    break;
+                case 'purple':
+                    root.style.setProperty('--primary-color', '#7209b7');
+                    root.style.setProperty('--secondary-color', '#560bad');
+                    root.style.setProperty('--primary-color-rgb', '114, 9, 183');
+                    break;
+                case 'orange':
+                    root.style.setProperty('--primary-color', '#f8961e');
+                    root.style.setProperty('--secondary-color', '#f3722c');
+                    root.style.setProperty('--primary-color-rgb', '248, 150, 30');
+                    break;
+                case 'red':
+                    root.style.setProperty('--primary-color', '#f72585');
+                    root.style.setProperty('--secondary-color', '#b5179e');
+                    root.style.setProperty('--primary-color-rgb', '247, 37, 133');
+                    break;
+                case 'teal':
+                    root.style.setProperty('--primary-color', '#06d6a0');
+                    root.style.setProperty('--secondary-color', '#04966b');
+                    root.style.setProperty('--primary-color-rgb', '6, 214, 160');
+                    break;
+                default: // blue
+                    root.style.setProperty('--primary-color', '#4361ee');
+                    root.style.setProperty('--secondary-color', '#3f37c9');
+                    root.style.setProperty('--primary-color-rgb', '67, 97, 238');
+            }
+            
+            // Save theme selection to localStorage
+            localStorage.setItem('theme', theme);
+            
+            // Remove transition class
+            setTimeout(() => {
+                document.body.classList.remove('theme-changing');
+            }, 500);
+            
+            // Show theme switch notification (using lighter notification)
+            showThemeToast(`Switched to ${getThemeName(theme)} theme`);
+        }
+
+        // Get theme name
+        function getThemeName(themeId) {
+            const themeNames = {
+                'blue': 'Blue',
+                'green': 'Green',
+                'purple': 'Purple',
+                'orange': 'Orange',
+                'red': 'Red',
+                'teal': 'Teal'
+            };
+            return themeNames[themeId] || 'Default';
+        }
+
+        // Add lightweight theme switch notification
+        function showThemeToast(message) {
+            // Create lightweight notification element
+            const toast = document.createElement('div');
+            toast.className = 'theme-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: var(--primary-color);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1060;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto-remove notification
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        // Show loading state
+        function showLoadingState() {
+            document.getElementById('today-tasks').innerHTML = `
+                <div class="text-center p-4 text-muted">
+                    <div class="loading-spinner mb-2"></div>
+                    <div>Loading tasks...</div>
+                </div>
+            `;
+            
+            document.getElementById('today-task-count').textContent = 'Loading...';
+            document.getElementById('total-tasks').textContent = '-';
+            document.getElementById('completed-tasks').textContent = '-';
+            document.getElementById('high-priority-tasks').textContent = '-';
+            document.getElementById('completion-rate').textContent = '-';
+        }
+
+        // Show Toast notification
+        function showToast(message, type) {
+            const toastElement = type === 'success' ? 
+                document.getElementById('successToast') : 
+                document.getElementById('errorToast');
+                
+            const messageElement = type === 'success' ?
+                document.getElementById('toastMessage') :
+                document.getElementById('errorToastMessage');
+                
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+        
+        // Export PDF functionality
+        document.getElementById('export-pdf').addEventListener('click', function() {
+            // Save current task data to localStorage
+            localStorage.setItem('pdfExportData', JSON.stringify(tasks));
+            
+            // Get current calendar state
+            const currentDate = calendar.getDate();
+            const currentView = calendar.view.type;
+            
+            // Build export URL
+            const params = new URLSearchParams({
+                view: currentView,
+                date: currentDate.toISOString().split('T')[0]
+            });
+            
+            // Open export page
+            window.open(`pdf-export.html?${params.toString()}`, '_blank');
+        });
+    </script>
+</body>
+</html>
