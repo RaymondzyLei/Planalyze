@@ -40,6 +40,7 @@ Planalyze 是一个功能强大的日程管理与任务规划系统，作为程�
 - C++编译器 (GCC 9.0+ 或 Clang 10.0+)
 - 现代Web浏览器 (Edge 90+, Chrome 90+, Firefox 88+, Safari 14+)
 - python 3或vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer),用于构建服务端环境
+- **GUI要求**: Python 3.6+ 包含 tkinter (通常标准Python安装已包含)
 - 没有其他要求了，很方便不是吗
 
 ### 安装步骤
@@ -54,6 +55,7 @@ cd Planalyze
 2. **编译后端程序**
 
    编译planalyze.cpp得到planalyze.exe
+   编译server.cpp得到server.exe
 
 3. **启动前端服务**
 ```bash
@@ -62,13 +64,37 @@ python -m http.server 8000
    或者使用vscode插件[Live Sever](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
 
 4. **访问应用**
-如果你是用的是python，打开浏览器访问 `http://localhost:8000`
+如果你使用的是python，打开浏览器访问 `http://localhost:8000`
+
+### GUI应用程序（替代方法）
+
+对于喜欢图形界面的用户，我们提供了两个GUI应用程序：
+
+**中文版GUI：**
+```bash
+python planalyze_gui_zh.py
+```
+
+**英文版GUI：**
+```bash
+python planalyze_gui.py
+```
+
+GUI提供：
+- 一键访问所有Planalyze功能
+- 可视化的日程操作界面
+- 内置提醒服务管理
+- 便捷的Web界面访问
+
+但是仍然要执行`2.编译后端程序`
 
 ## 📁 项目结构
 
 ```
 planalyze/
 ├── planalyze.cpp            # 主程序源代码
+├── planalyze_gui.py         # 中文GUI应用程序
+├── planalyze_gui_en.py      # 英文GUI应用程序
 ├── json.hpp                 # JSON库头文件
 ├── data/                    # 数据存储目录
 │   ├── bg.jpg               # 背景图片
@@ -96,6 +122,12 @@ planalyze/
 3. **管理任务**
    - 标记任务完成状态
    - 设置任务优先级
+
+4. **提醒功能**
+   - **启动提醒服务**: 运行 `server.exe` 启用自动任务提醒
+   - **实时通知**: 服务器监控任务截止时间并显示弹窗通知
+   - **后台运行**: 提醒服务在后台运行，不影响其他操作
+   - **GUI集成**: 使用GUI的"打开提醒"按钮可便捷访问提醒服务
 
 ### 命令行接口示例
 

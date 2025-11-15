@@ -42,6 +42,7 @@ Planalyze is a powerful schedule management and task planning system developed a
 - C++ compiler (GCC 9.0+ or Clang 10.0+)
 - Modern web browser (Edge 90+, Chrome 90+, Firefox 88+, Safari 14+)
 - Python 3 or VSCode extension [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) for building server environment
+- **GUI Requirements**: Python 3.6+ with tkinter (usually included in standard Python installations)
 - No other requirements needed - pretty convenient, right?
 
 ### Installation Steps
@@ -56,6 +57,7 @@ cd Planalyze
 2. **Compile Backend Program**
 
    Compile planalyze.cpp to get planalyze.exe
+   Compile server.cpp to get server.exe
 
 3. **Start Frontend Server**
 ```bash
@@ -66,11 +68,35 @@ python -m http.server 8000
 4. **Access Application**
    Open browser and visit `http://localhost:8000/index-en.html` if using python
 
+### GUI Application (Alternative Method)
+
+For users who prefer a graphical interface, we provide two GUI applications:
+
+**Chinese Version GUI:**
+```bash
+python planalyze_gui_zh.py
+```
+
+**English Version GUI:**
+```bash
+python planalyze_gui.py
+```
+
+The GUI provides:
+- One-click access to all Planalyze functions
+- Visual interface for schedule operations
+- Built-in reminder service management
+- Easy web interface access
+
+but you still need to do `2.Compile Backend Program`
+
 ## 📁📁 Project Structure
 
 ```
 planalyze/
 ├── planalyze.cpp            # Main program source code
+├── planalyze_gui.py         # Chinese GUI application
+├── planalyze_gui_en.py      # English GUI application
 ├── json.hpp                 # JSON library header file
 ├── data/                    # Data storage directory
 │   ├── bg.jpg               # Background image
@@ -98,6 +124,12 @@ planalyze/
 3. **Manage Tasks**
    - Mark task completion status
    - Set task priorities
+
+4. **Reminder Functionality**
+   - **Start Reminder Service**: Run `server.exe` to enable automatic task reminders
+   - **Real-time Notifications**: The server monitors task deadlines and displays popup notifications
+   - **Background Operation**: The reminder service runs in the background without interfering with other operations
+   - **GUI Integration**: Use the GUI's "Open Reminders" button for easy access to the reminder service
 
 ### Command Line Interface Examples
 
