@@ -175,12 +175,14 @@ std::string read_from_file(const std::string& filename) {
         if (file.eof()) break;
         res += c;
     }
+    file.close();
     return res;
 }
 bool write_to_file(const std::string& filename, const std::string& content) {
     std::ofstream file(filename);
     if (!file.is_open()) return true;
     file << content;
+    file.close();
     return false;
 }
 
@@ -193,29 +195,29 @@ void _help_all() {
     printf("                                    |___/           \n");
     std::cout << "Start your journy with Planalyze right now!" << std::endl;
     std::cout << "Usage: " << std::endl;
-    std::cout << "  ./planalyze.exe [--help|-h] (<Command>)     show help for a command or all commands" << std::endl;
-    std::cout << "  ./planalyze.exe [--add|-a] ...              add a new event" << std::endl;
-    std::cout << "  ./planalyze.exe [--remove|-r] ...           remove events" << std::endl;
-    std::cout << "  ./planalyze.exe [--list|-l] ...             list events" << std::endl;
+    std::cout << "  planalyze [--help|-h] (<Command>)     show help for a command or all commands" << std::endl;
+    std::cout << "  planalyze [--add|-a] ...              add a new event" << std::endl;
+    std::cout << "  planalyze [--remove|-r] ...           remove events" << std::endl;
+    std::cout << "  planalyze [--list|-l] ...             list events" << std::endl;
 }
 void _help_add() {
     std::cout << "Usage: " << std::endl;
-    std::cout << "  ./planalyze.exe [--add|-a] [--help|-h]                   show help for this command" << std::endl;
-    std::cout << "  ./planalyze.exe [--add|-a] [schedule|point|deadline]     show help for this command" << std::endl;
+    std::cout << "  planalyze [--add|-a] [--help|-h]                   show help for this command" << std::endl;
+    std::cout << "  planalyze [--add|-a] [schedule|point|deadline]     show help for this command" << std::endl;
 }
 void _help_remove() {
     std::cout << "Usage: " << std::endl;
-    std::cout << "  ./planalyze.exe [--remove|-r] [--help|-h]          show help for this command" << std::endl;
-    std::cout << "  ./planalyze.exe [--remove|-r] <ID>                 remove the event with the given ID" << std::endl;
-    std::cout << "  ./planalyze.exe [--remove|-r] <ID> <DATE>          remove the event with the given ID and date" << std::endl;
-    std::cout << "  ./planalyze.exe [--remove|-r] <ID> <FROM> <TO>     remove the subevent with the given ID and range" << std::endl;
+    std::cout << "  planalyze [--remove|-r] [--help|-h]          show help for this command" << std::endl;
+    std::cout << "  planalyze [--remove|-r] <ID>                 remove the event with the given ID" << std::endl;
+    std::cout << "  planalyze [--remove|-r] <ID> <DATE>          remove the event with the given ID and date" << std::endl;
+    std::cout << "  planalyze [--remove|-r] <ID> <FROM> <TO>     remove the subevent with the given ID and range" << std::endl;
 }
 void _help_list() {
     std::cout << "Usage: " << std::endl;
-    std::cout << "  ./planalyze.exe [--list|-l] [--help|-h]                 show help for this command" << std::endl;
-    std::cout << "  ./planalyze.exe [--list|-l] [--all|-a]                  show all events" << std::endl;
-    std::cout << "  ./planalyze.exe [--list|-l] [--certain|-c] <ID1,ID2,...>         show the event with the given ID" << std::endl;
-    std::cout << "  ./planalyze.exe [--list|-l] [--detail|-d]               show details of events" << std::endl;
+    std::cout << "  planalyze [--list|-l] [--help|-h]                 show help for this command" << std::endl;
+    std::cout << "  planalyze [--list|-l] [--all|-a]                  show all events" << std::endl;
+    std::cout << "  planalyze [--list|-l] [--certain|-c] <ID1,ID2,...>         show the event with the given ID" << std::endl;
+    std::cout << "  planalyze [--list|-l] [--detail|-d]               show details of events" << std::endl;
 }
 
 void _help(std::string s) {
@@ -246,6 +248,7 @@ void save_events() {
     data["total"] = tot;
     data["events"] = events;
     write_to_file("data.json", data.dump(4));
+    write_to_file("update.txt", "1");
 }
 
 void help(int argc, char* argv[]) {
@@ -788,7 +791,7 @@ void remove(int argc, char* argv[]) {
         return;
     }
     if (e["repetition"] == "Yearly") {
-        if (s1 != "-1" && !std::binary_search(e["enabl  ed_days"].begin(), e["enabled_days"].end(), date1.dump().substr(5, 5))) {
+        if (s1 != "-1" && !std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), date1.dump().substr(5, 5))) {
             if (argc == 2) std::cout << "Date not found\n";
             else std::cout << "Left date not found.\n";
             return;

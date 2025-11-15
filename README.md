@@ -13,7 +13,7 @@ Planalyze is a powerful schedule management and task planning system developed a
 - 📝📝 **Task Management** - Support for task CRUD operations
 - ⚡⚡⚡ **Fast Command Line Processing** - Efficient data processing powered by C++ backend
 - 🎨🎨🎨 **Responsive Design** - Bootstrap interface adaptable to various device sizes
-- 🔔🔔 **Reminder Functionality** - Timely notifications for important schedules and tasks (todo)
+- 🔔🔔 **Reminder Functionality** - Timely notifications for important schedules and tasks
 
 ### Technical Highlights
 - Frontend-backend separation architecture
