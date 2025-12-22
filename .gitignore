@@ -2,3 +2,4 @@
 *.exe
 data.json
 update.txt
+*.pdb
