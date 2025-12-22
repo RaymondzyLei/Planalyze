@@ -163,7 +163,19 @@ Time operator+(Time a, const Duration& b) {
     a.hour %= 24;
     return a;
 }
-
+Time operator-(Time a,const Duration& b){
+    int digit=0;
+    a.minute -= b.minute;
+    while(a.minute<0){
+        a.minute+=60;
+        digit+=1;
+    }
+    a.hour -=digit;
+    while(a.minute<0){
+        a.hour+=24;
+    }
+    return a;
+}
 std::vector<json> events;
 
 std::string read_from_file(const std::string& filename) {
@@ -199,6 +211,8 @@ void _help_all() {
     std::cout << "  planalyze.exe [--add|-a] ...              add a new event" << std::endl;
     std::cout << "  planalyze.exe [--remove|-r] ...           remove events" << std::endl;
     std::cout << "  planalyze.exe [--list|-l] ...             list events" << std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] ...             edit events" << std::endl;
+    //修改help输出
 }
 void _help_add() {
     std::cout << "Usage: " << std::endl;
@@ -219,12 +233,22 @@ void _help_list() {
     std::cout << "  planalyze.exe [--list|-l] [--certain|-c] <ID1,ID2,...>         show the event with the given ID" << std::endl;
     std::cout << "  planalyze.exe [--list|-l] [--detail|-d]               show details of events" << std::endl;
 }
+void _help_edit() {
+    std::cout << "Usage: " << std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] [--help|-h]                                    show help for this command" << std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] <ID>                                           show the rule of  assigned event edits" << std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] <ID> [--type|-t]                               edit the type of the event"<< std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] <ID> [--repetition|-r]                         edit the repetition of the event"<< std::endl;
+    std::cout << "  planalyze.exe [--edit|-e] <ID> [--detail|-d] <detail1,detail2...>        edit the detail of the event"<< std::endl;
+}
+
 
 void _help(std::string s) {
     if (s == "") _help_all();
     else if (s == "add" || s == "-a" || s == "--add") _help_add();
     else if (s == "remove" || s == "-r" || s == "--remove") _help_remove();
     else if (s == "list" || s == "-l" || s == "--list") _help_list();
+    else if (s == "edit" || s == "-e" || s == "--edit") _help_edit();
     else std::cout << "unknown command: " << s << std::endl;
 }
 int tot;
@@ -330,42 +354,15 @@ int read_int(std::string question = "Integer: ", std::string wrong = "Invalid in
         return x >= min && x <= max;
     }));
 }
-
-void add(int argc, char* argv[]) {
-    if (argc == 0) return _help_add();
-    std::string argv0(argv[0]);
-    if (argv0 == "--help" || argv0 == "-h") {
-        _help_add();
-        return;
-    }
-    json new_event;
-    if (argv0 == "schedule" || argv0 == "point" || argv0 == "deadline") {
-        read_events();
-        std::string s;
-        new_event["type"] = argv0;
-        new_event["title"] = read_anything("Title: ");
-        new_event["description"] = read_anything("Description: ");
-        new_event["category"] = read_anything("Category: ");
-        new_event["priority"] = read_option(
-            "Priority([L]ow, [M]edium, [H]igh): ", 
-            "Unknown priority, please choose again([L]ow, [M]edium, [H]igh):", 
-            {"Low", "Medium", "High"}
-        );
-        new_event["repetition"] = read_option(
+void get_repetition(json& new_event){
+    new_event["repetition"] = read_option(
             "Repetition Method([O]nce, [D]aily, [W]eakly, [M]onthly, [Y]early, [C]ustom):",
             "Unknown method, please choose again([O]nce, [D]aily, [W]eakly, [M]onthly, [Y]early, [C]ustom):",
             {"Once", "Daily", "Weekly", "Monthly", "Yearly", "Custom"}
         );
-        if (new_event["repetition"] == "Custom") {
+    if (new_event["repetition"] == "Custom") {
             new_event["same_time_each_day"] = read_yn("Same time every day(Y/N): ");
-            if (new_event["same_time_each_day"]) {
-                if (argv0 == "schedule") {
-                    new_event["start_time"] = read_time("Start Time: ").dump();
-                    new_event["duration"] = read_time("Duration: ").dump();
-                    new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-                } else {
-                    new_event["time"] = read_time("Time: ").dump();
-                }
+            if (new_event["same_time_each_day"]==false) {
                 std::cout << "Input the dates of the event(yyyy-mm-dd), ends with 'end': \n";
                 std::set<std::string> dates;
                 int n = 0;
@@ -383,6 +380,13 @@ void add(int argc, char* argv[]) {
                     });
                     if (tmp["date"] == "end") break;
                     tmp["completed"] = false;
+                    if (new_event["type"]== "schedule") {
+                        tmp["start_time"] = read_time("Start Time: ").dump();
+                        tmp["duration"] = read_duration("Duration: ").dump();
+                        tmp["end_time"] = (Time::parse(tmp["start_time"]) + Duration::parse(tmp["duration"])).dump();
+                    } else {
+                        tmp["time"] = read_time("Time: ").dump();
+                    }
                     new_event["subevents"].push_back(tmp);
                 }
             } else {
@@ -401,15 +405,15 @@ void add(int argc, char* argv[]) {
                         return true;
                     });
                     if (tmp["date"] == "end") break;
-                    if (argv0 == "schedule") {
-                        tmp["start_time"] = read_time("Start Time(" + to_string(n) + "): ").dump();
-                        tmp["duration"] = read_duration("Duration(" + to_string(n) + "): ").dump();
-                        tmp["end_time"] = (Time::parse(tmp["start_time"]) + Duration::parse(tmp["duration"])).dump();
-                    } else {
-                        tmp["time"] = read_time("Time(" + to_string(n) + "): ").dump();
-                    }
                     tmp["completed"] = false;
                     new_event["subevents"].push_back(tmp);
+                }
+                if (new_event["type"]== "schedule") {
+                    new_event["start_time"] = read_time("Start Time: ").dump();
+                    new_event["duration"] = read_duration("Duration: ").dump();
+                    new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
+                } else {
+                    new_event["time"] = read_time("Time: ").dump();
                 }
             }
             std::sort(new_event["subevents"].begin(), new_event["subevents"].end(), [](const json& a, const json& b) {
@@ -421,18 +425,11 @@ void add(int argc, char* argv[]) {
                 }), new_event["subevents"].end());
             }
         } 
-        if (new_event["repetition"] == "Once") {
+    if (new_event["repetition"] == "Once") {
             new_event["date"] = read_date("Date: ").dump();
-            if (argv0 == "schedule") {
-                new_event["start_time"] = read_time("Start time: ").dump();
-                new_event["duration"] = read_duration("Duration: ").dump();
-                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-            } else {
-                new_event["time"] = read_time("Time: ").dump();
-            }
             new_event["completed"] = false;
         }
-        if (new_event["repetition"] == "Daily") {
+    if (new_event["repetition"] == "Daily") {
             new_event["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [](std::string& s) {
                 if (s == "-1") return true;
                 if (Date::parse(s).day == -1) return false;
@@ -446,17 +443,10 @@ void add(int argc, char* argv[]) {
                 if (new_event["start_time"] != "-1" && s < new_event["start_date"]) return false;
                 return true;
             });
-            if (argv0 == "schedule") {
-                new_event["start_time"] = read_time("Start Time: ").dump();
-                new_event["duration"] = read_duration("Duration: ").dump();
-                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-            } else {
-                new_event["time"] = read_time("Time: ").dump();
-            }
             new_event["completed"] = json::array();
             new_event["banned"] = json::array();
         }
-        if (new_event["repetition"] == "Weekly") {
+    if (new_event["repetition"] == "Weekly") {
             std::string tmp = read_something("Enabled days(0-6, separated by space, 0 stands for Sunday): ", "Invalid input, please enter again(0-6, separated by space, 0 stands for Sunday): ", [](std::string& s) {
                 auto x = split(s, ' ');
                 for (auto& y : x) {
@@ -483,17 +473,10 @@ void add(int argc, char* argv[]) {
                 if (new_event["start_time"] != "-1" && s < new_event["start_date"]) return false;
                 return std::binary_search(new_event["enabled_days"].begin(), new_event["enabled_days"].end(), get_weekday(Date::parse(s)));
             });
-            if (argv0 == "schedule") {
-                new_event["start_time"] = read_time("Start Time: ").dump();
-                new_event["duration"] = read_duration("Duration: ").dump();
-                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-            } else {
-                new_event["time"] = read_time("Time: ").dump();
-            }
             new_event["completed"] = json::array();
             new_event["banned"] = json::array();
         }
-        if (new_event["repetition"] == "Monthly") {
+    if (new_event["repetition"] == "Monthly") {
             std::string tmp = read_something("Enabled days(1-31, separated by space): ", "Invalid input, please enter again(1-31, separated by space): ", [](std::string& s) {
                 auto x = split(s, ' ');
                 for (auto& y : x) {
@@ -520,17 +503,10 @@ void add(int argc, char* argv[]) {
                 if (new_event["start_time"] != "-1" && s < new_event["start_date"]) return false;
                 return std::binary_search(new_event["enabled_days"].begin(), new_event["enabled_days"].end(), Date::parse(s).day);
             });
-            if (argv0 == "schedule") {
-                new_event["start_time"] = read_time("Start Time: ").dump();
-                new_event["duration"] = read_duration("Duration: ").dump();
-                new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-            } else {
-                new_event["time"] = read_time("Time: ").dump();
-            }
             new_event["completed"] = json::array();
             new_event["banned"] = json::array();
         }
-        if (new_event["repetition"] == "Yearly") {
+    if (new_event["repetition"] == "Yearly") {
             std::string tmp = read_something("Enabled days(1-1 to 12-31): ", "Invalid input, please enter again(1-1 to 12-31): ", [](std::string& s) {
                 auto x = split(s, ' ');
                 for (auto& y : x) {
@@ -557,16 +533,42 @@ void add(int argc, char* argv[]) {
                 if (new_event["start_time"] != "-1" && s < new_event["start_date"]) return false;
                 return std::binary_search(new_event["enabled_days"].begin(), new_event["enabled_days"].end(), s.substr(5, 5));
             });
+            new_event["completed"] = json::array();
+            new_event["banned"] = json::array();
+        }
+}
+void add(int argc, char* argv[]) {
+    if (argc == 0) return _help_add();
+    std::string argv0(argv[0]);
+    if (argv0 == "--help" || argv0 == "-h") {
+        _help_add();
+        return;
+    }
+    json new_event;
+    if (argv0 == "schedule" || argv0 == "point" || argv0 == "deadline") {
+        read_events();
+        std::string s;
+        new_event["type"] = argv0;
+        new_event["title"] = read_anything("Title: ");
+        new_event["description"] = read_anything("Description: ");
+        new_event["category"] = read_anything("Category: ");
+        new_event["priority"] = read_option(
+            "Priority([L]ow, [M]edium, [H]igh): ", 
+            "Unknown priority, please choose again([L]ow, [M]edium, [H]igh):", 
+            {"Low", "Medium", "High"}
+        );
+        get_repetition(new_event);
+        if(new_event["repetition"]!="Custom"){
             if (argv0 == "schedule") {
                 new_event["start_time"] = read_time("Start Time: ").dump();
                 new_event["duration"] = read_duration("Duration: ").dump();
                 new_event["end_time"] = (Time::parse(new_event["start_time"]) + Duration::parse(new_event["duration"])).dump();
-            } else {
+        } else {
                 new_event["time"] = read_time("Time: ").dump();
-            }
-            new_event["completed"] = json::array();
-            new_event["banned"] = json::array();
         }
+        }
+        
+        
         new_event["id"] = ++tot;
         events.push_back(new_event);
         save_events();
@@ -575,6 +577,7 @@ void add(int argc, char* argv[]) {
         _help_add();
     }
 }
+
 Date add_days(Date d, int days) {
     std::tm t = combine_date_time(d, Time{0, 0});
     t.tm_mday += days;
@@ -937,6 +940,402 @@ void list(int argc, char* argv[]) {
     }
 }
 
+void _edit_rule(json& e){
+    std::cout<<"For all the events,you can change "<<"title,description,category,priority\n";
+    std::cout<<"For all the events,you can change "<<"type[schedule/point/deadline]\n";
+    if(e["type"]=="schedule") std::cout<<"If you keep "<<e["id"]<<" as "<<e["type"]<<" ,you can change "<<"start_time,end_time\n";
+    else std::cout<<"If you keep "<<e["id"]<<" as "<<e["type"]<<" ,you can change "<<"time\n";
+    std::cout<<"For all the events,you can change "<<"repetition[Once/Daily/Weekly/Monthly/Yearly/Custom]\n";
+    if(e["repetition"]=="Once"){
+        std::cout<<"If you keep "<<e["id"]<<" as a "<<e["repetition"]<<" event,you can change "<<"date\n";}
+    else if(e["repetition"]=="Daily"||e["repetition"]=="Weekly"||e["repetition"]=="Monthly"||e["repetition"]=="Yearly"){
+        std::cout<<"If you keep "<<e["id"]<<" as a "<<e["repetition"]<<" event,you can change "<<"enabled_days,start_date,end_date\n";
+    }else{
+        std::cout<<"If you keep "<<e["id"]<<" as a "<<e["repetition"]<<" event,you can change same_time_each_day[Y/N],subevents"<<"\n";
+    }
+}
+void _edit_subevents(json&e){
+    json& sub=e["subevents"];
+    for(int i=0;i<sub.size();i++){
+        std::cout<<"Date("<<i+1<<"):"<<sub[i]["date"]<<"\n";
+        bool yn=read_yn("Modify or not(Y/N):");
+        if(yn){
+        sub[i]["date"]=read_date("Date: ").dump();}
+}
+}
+void _edit_same(json&e){
+    json& sub=e["subevents"];
+    bool original=e["same_time_each_day"] ;
+    std::cout<<"Original same_time_each_day is "<<e["same_time_each_day"]<<",Please input a new same_time_each_day."<<"\n";
+    e["same_time_each_day"] = read_yn("Same time every day(Y/N): ");
+    if(e["same_time_each_day"]){
+        
+        if (e["type"]== "schedule") {
+            if(original==false){
+                for(int i=0;i<sub.size();i++){
+                sub[i].erase("start_time");sub[i].erase("duration");sub[i].erase("end_time");
+            }}
+                e["start_time"] = read_time("Start Time: ").dump();
+                e["duration"] = read_duration("Duration: ").dump();
+                e["end_time"] = (Time::parse(e["start_time"]) + Duration::parse(e["duration"])).dump();
+            } else {
+                if(original==false){
+                for(int i=0;i<sub.size();i++){
+                sub[i].erase("time");
+            }}
+                e["time"] = read_time("Time: ").dump();
+            }
+    }else{
+        
+        if (e["type"]== "schedule") {
+            if(original==true){
+                e.erase("start_time");e.erase("duration");e.erase("end_time");
+            }
+            for(int i=0;i<sub.size();i++){
+                sub[i].erase("start_time");sub[i].erase("duration");sub[i].erase("end_time");
+                std::cout<<"Date("<<i+1<<"):"<<sub[i]["date"]<<"\n";
+                sub[i]["start_time"] = read_time("Start Time: ").dump();
+                sub[i]["duration"] = read_duration("Duration: ").dump();
+                sub[i]["end_time"] = (Time::parse(sub[i]["start_time"]) + Duration::parse(sub[i]["duration"])).dump();
+            }
+        } else {
+            if(original==true){
+                e.erase("time");
+            }
+            for(int i=0;i<sub.size();i++){
+                sub[i].erase("time");
+                std::cout<<"Date(" <<i+1<<"): "<<sub[i]["date"]<<"\n";
+                sub[i]["time"] = read_time("Time: ").dump();
+            }
+        }
+    }
+}
+void _edit_repetition(json& e){
+    std::cout<<"Original repetition:"<<e["repetition"]<<"\n";
+    e.erase("start_date");
+    e.erase("end_date");
+    e.erase("enabled_days");  
+    e.erase("subevents");
+    get_repetition(e);
+}
+void _edit_enabled(json& e){
+    e.erase("enabled_days");
+    e.erase("start_date");
+    e.erase("end_date");
+    if(e.count("banned")>0){
+        e.erase("banned");                         
+    }
+    if(e["repetition"]=="Weekly"){
+        std::string tmp = read_something("Enabled days(0-6, separated by space, 0 stands for Sunday): ", "Invalid input, please enter again(0-6, separated by space, 0 stands for Sunday): ", [](std::string& s) {
+                auto x = split(s, ' ');
+                for (auto& y : x) {
+                    if (std::stoi(y) < 0 || std::stoi(y) > 6) return false;
+                }
+                return true;
+            });
+            auto tmp1 = split(tmp, ' ');
+            for (auto& x : tmp1) {
+                e["enabled_days"].push_back(std::stoi(x));
+            }
+            std::sort(e["enabled_days"].begin(), e["enabled_days"].end());
+            e["enabled_days"].erase(std::unique(e["enabled_days"].begin(), e["enabled_days"].end()), e["enabled_days"].end());
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), get_weekday(Date::parse(s)));
+            });
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), get_weekday(Date::parse(s)));
+            });
+    }else if(e["repetition"]=="Monthly"){
+        std::string tmp = read_something("Enabled days(1-31, separated by space): ", "Invalid input, please enter again(1-31, separated by space): ", [](std::string& s) {
+                auto x = split(s, ' ');
+                for (auto& y : x) {
+                    if (std::stoi(y) < 1 || std::stoi(y) > 31) return false;
+                }
+                return true;
+            });
+            auto tmp1 = split(tmp, ' ');
+            for (auto& x : tmp1) {
+                e["enabled_days"].push_back(std::stoi(x));
+            }
+            std::sort(e["enabled_days"].begin(), e["enabled_days"].end());
+            e["enabled_days"].erase(std::unique(e["enabled_days"].begin(), e["enabled_days"].end()), e["enabled_days"].end());
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), Date::parse(s).day);
+            });
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), Date::parse(s).day);
+            });
+    }else if(e["repetition"]=="Yearly"){
+        std::string tmp = read_something("Enabled days(1-1 to 12-31): ", "Invalid input, please enter again(1-1 to 12-31): ", [](std::string& s) {
+                auto x = split(s, ' ');
+                for (auto& y : x) {
+                    if (DateWithoutYear::parse(y).day == -1) return false;
+                }
+                return true;
+            });
+            auto tmp1 = split(tmp, ' ');
+            for (auto& x : tmp1) {
+                e["enabled_days"].push_back(DateWithoutYear::parse(x).dump());
+            }
+            std::sort(e["enabled_days"].begin(), e["enabled_days"].end());
+            e["enabled_days"].erase(std::unique(e["enabled_days"].begin(), e["enabled_days"].end()), e["enabled_days"].end());
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), s.substr(5, 5));
+            });
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), s.substr(5, 5));
+            });
+    }else{
+        std::cout<<"Enabaled_days is invalid\n";
+    }
+}
+void _edit_date(json& e,std::string &i){
+    
+    if(e["repetition"]=="Daily"){
+        if(i=="start_date"){
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return true;
+            });
+        }else{
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return true;
+            });
+        }
+    }else if(e["repetition"]=="Weekly"){
+        if(i=="start_date"){
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), get_weekday(Date::parse(s)));
+            });
+        }else{
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), get_weekday(Date::parse(s)));;
+            });
+        }
+    }else if(e["repetition"]=="Monthly"){
+        if(i=="start_date"){
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), Date::parse(s).day);
+            });
+        }else{
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), Date::parse(s).day);;
+            });
+        }
+    }else if(e["repetition"]=="Yearly"){
+        if(i=="start_date"){
+            e["start_date"] = read_something("Start date(yyyy-mm-dd, -1 for no start): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no start): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(),s.substr(5,5) );
+            });
+        }else{
+            e["end_date"] = read_something("End date(yyyy-mm-dd, -1 for no end): ", "Invalid date, please enter again(yyyy-mm-dd, -1 for no end): ", [&](std::string& s) {
+                if (s == "-1") return true;
+                if (Date::parse(s).day == -1) return false;
+                s = Date::parse(s).dump();
+                if (e["start_time"] != "-1" && s < e["start_date"]) return false;
+                return std::binary_search(e["enabled_days"].begin(), e["enabled_days"].end(), s.substr(5,5));;
+            });
+        }
+    }
+}
+void _edit_type(json &e){
+    std::string t=e["type"]; 
+
+    std::cout<<"Original type:"<<e["type"]<<"\n";
+    e["type"]=read_something("Type:","Invalid type, please enter again\n",[&](std::string& s){
+        if(s=="schedule"||s=="point"||s=="deadline") return true;
+        else return false;
+    });
+    if(e["type"]==t) {
+        std::cout <<"Same type,invalid operation\n";
+        return;
+    }
+    if(t=="schedule"){
+        e.erase("duration");
+        e.erase("start_time");
+        e.erase("end_time");
+        e["time"]=read_time("Time: ").dump();
+    }
+    else if(e["type"]=="schedule"){
+        e.erase("time");
+        e["start_time"] = read_time("Start time: ").dump();
+        e["duration"] = read_duration("Duration: ").dump();
+        e["end_time"] = (Time::parse(e["start_time"]) + Duration::parse(e["duration"])).dump();
+    }
+    else{
+        e["time"]=read_time("Time: ").dump();
+    }
+}
+void _edit_detail(json &e,std::vector<std::string>& details){
+    for(auto i=details.begin();i!=details.end();++i){
+        if(e.count(*i)>0){
+            if(*i=="title"){
+                std::cout<<"Original title is "<<e["title"]<<",Please input a new title."<<"\n";
+                e["title"] = read_anything("Title: ");
+            }else if(*i=="description"){
+                std::cout<<"Original description is "<<e["description"]<<",Please input a new description."<<"\n";
+                e["description"] = read_anything("Description: ");
+            }else if(*i=="category"){
+                std::cout<<"Original category is "<<e["category"]<<",Please input a new category."<<"\n";
+                e["category"] = read_anything("Category: ");
+            }else if(*i=="priority"){
+                std::cout<<"Original priority is "<<e["priority"]<<",Please input a new priority."<<"\n";
+                e["priority"] = read_option(
+                    "Priority([L]ow, [M]edium, [H]igh): ", 
+                    "Unknown priority, please choose again([L]ow, [M]edium, [H]igh):", 
+                    {"Low", "Medium", "High"}
+                );
+            }else if(*i=="start_time"){
+                std::cout<<"Original start_time is "<<e["start_time"]<<",Please input a new start_time."<<"\n";
+                e["start_time"] = read_time("Start time: ").dump();
+                e["end_time"] = (Time::parse(e["start_time"]) + Duration::parse(e["duration"])).dump();
+            }else if(*i=="end_time"){
+                std::cout<<"Original end_time is "<<e["end_time"]<<",Please input a new end_time."<<"\n";
+                e["end_time"] = read_time("End time: ").dump();
+                e["start_time"] = (Time::parse(e["end_time"]) - Duration::parse(e["duration"])).dump();
+            }else if(*i=="duration"){
+                std::cout<<"Original duration is "<<e["duration"]<<",Please input a new duration."<<"\n";
+                e["duration"] = read_duration("Duration: ").dump();
+                e["end_time"] = (Time::parse(e["start_time"]) + Duration::parse(e["duration"])).dump();
+            }else if(*i=="time"){
+                std::cout<<"Original time is "<<e["time"]<<",Please input a new time."<<"\n";
+                e["time"] = read_time("Time: ").dump();
+            }else if(*i=="date"){
+                std::cout<<"Original date is "<<e["date"]<<",Please input a new date."<<"\n";
+                e["date"]=read_date("Date: ").dump();
+            }else if(*i=="enabled_days"){
+                _edit_enabled(e);
+            }else if(*i=="start_date"||*i=="end_date"){
+                _edit_date(e,*i);
+            }else if(*i=="same_time_each_day"){
+                _edit_same(e);
+            }else if(*i=="subevents"){
+                _edit_subevents(e);
+            }
+            else{
+                std::cout<< *i<<" cannot be edited in detail section.\n";
+            }
+        }else{
+            std::cout<< *i<<" is invalid.\n";
+        }
+    }
+}
+
+void edit(int argc,char* argv[]){
+    if (argc == 0) return _help_edit();
+    std::string argv0 = argv[0];
+    if (argv0 == "-h" || argv0 == "--help") return _help_edit();
+    read_events();
+
+    std::vector<json>::iterator it;
+    int id = to_uint(argv0);
+    if (id < 0) {
+        std::cout << "Invalid event id.\n";
+        return;
+    }
+    it= std::lower_bound(events.begin(), events.end(), id, [](json& a, int b) {
+    return a["id"] < b;
+    });
+    if (it == events.end() || it->at("id") != id) {
+        std::cout << "Event not found.\n";
+        return;     
+    }
+    if(argc==1){
+        _edit_rule(*it);           
+        return;
+    }
+
+    json e=*it;
+    std::vector<std::string> details;
+    bool type=false,detail=false,repetition=false;
+    for(int i=1;i<argc;++i){
+        std::string arg=argv[i];
+        if(arg=="-t"||arg=="type"||arg=="--type"){
+            type=true;
+        }else if(arg=="-d"||arg=="detail"||arg=="--detail"){
+            detail=true;
+        }else if(arg=="-r"||arg=="repetition"||arg=="--repetition"){
+            repetition=true;
+        }
+        else{
+            details=split(arg,',');
+            detail=true;
+        }
+    }
+    if(type==true&&detail==true){
+        std::cout<<"Cannot use -t and -d together\n";
+        return;
+    }else if(type==true&&repetition==true){
+        std::cout<<"Cannot use -t and -r together\n";
+        return;
+    }else if(detail==true&&repetition==true){
+        std::cout<<"Cannot use -d and -r together\n";
+        return;
+    }else if(type){
+        if(details.size()==0) {_edit_type(e);}
+        else{std::cout<<"Cannot use -t and -d together\n";return;}
+    }else if(repetition&&details.size()==0){
+        if(details.size()==0) {_edit_repetition(e);}
+        else{std::cout<<"Cannot use -d and -r together\n";return;}
+    }
+    else if(detail&&details.size()!=0){
+        _edit_detail(e,details);
+    }else if(detail&&details.size()==0){
+        std::cout<<"Please specify the details\n";
+        return;
+    }
+    else{
+        std::cout<<"Invalid command.\n";
+        return;
+    }
+    *it=e;
+    save_events();
+}
+
 int main(int argc, char* argv[]) {
     system("chcp 65001");
     if (argc == 1) {
@@ -960,4 +1359,9 @@ int main(int argc, char* argv[]) {
         list(argc - 2, argv + 2);
         return 0;
     }
+    if (s == "-e" || s == "--edit") {
+        edit(argc - 2, argv + 2);
+        return 0;
+    }
+    //加入-e分支
 }
